@@ -1,12 +1,12 @@
 package com.company.amazonOA;
 
 import java.util.*;
+
 class PairString {
     String first;
     String second;
 
-    PairString(String first, String second)
-    {
+    PairString(String first, String second) {
         this.first = first;
         this.second = second;
     }
@@ -38,8 +38,44 @@ public class oa {
     }
 
     // Amazon air prime
-    public static int[] primeAirTime(int[][] arr1, int[][] arr2, int k) {
-        return null;
+    public static List<List<Integer>> primeAirTime(List<List<Integer>> l1, List<List<Integer>> l2, int k) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (k == 0 || l1 == null || l1.size() == 0 || l2 == null || l2.size() == 0) {
+            res.add(new ArrayList<>());
+            return res;
+        }
+
+        Collections.sort(l1, Comparator.comparingInt(a -> a.get(1)));
+        Collections.sort(l2, (a, b) -> a.get(1) - b.get(1));
+
+        int dist = 0;
+        for (int i = 0; i < l1.size(); i++) {
+            for (int j = 0; j < l2.size(); j++) {
+                int sum = l1.get(i).get(1) + l2.get(j).get(1);
+                if (sum > k) {
+                    break;
+                } else if (sum == dist) {
+                    List<Integer> cur = new ArrayList<>();
+                    cur.add(l1.get(i).get(0));
+                    cur.add(l2.get(j).get(0));
+                    res.add(cur);
+                    dist = sum;
+                } else if (sum > dist) {
+                    res.clear();
+                    List<Integer> cur = new ArrayList<>();
+                    cur.add(l1.get(i).get(0));
+                    cur.add(l2.get(j).get(0));
+                    res.add(cur);
+                    dist = sum;
+                } else if (sum == dist) {
+                    List<Integer> cur = new ArrayList<>();
+                    cur.add(l1.get(i).get(0));
+                    cur.add(l2.get(j).get(0));
+                    res.add(cur);
+                }
+            }
+        }
+        return res;
     }
 
     // longest path in matrix lc 329
@@ -127,8 +163,8 @@ public class oa {
 
         int m = matrix.length;
         int n = m == 0 ? 0 : matrix[0].length;
-        int[] dir = {0,1,0,-1,0};
-        boolean[] vis = new boolean[m*n];
+        int[] dir = {0, 1, 0, -1, 0};
+        boolean[] vis = new boolean[m * n];
         Queue<Integer> q = new LinkedList<>();
         q.add(0);
         vis[0] = true;
@@ -141,7 +177,7 @@ public class oa {
                 int idx = q.poll();
                 for (int j = 0; j < 4; j++) {
                     int r = idx / n + dir[j];
-                    int c = idx % n + dir[j+1];
+                    int c = idx % n + dir[j + 1];
                     if (r < 0 || c < 0 || r >= m || c >= n || matrix[r][c] == 0 || vis[r * n + c]) continue;
                     else if (matrix[r][c] == 9) return distance;
                     else {
@@ -153,11 +189,11 @@ public class oa {
         }
         return -1;
     }
-    
+
     // five star seller https://leetcode.com/playground/2d2z2dJ6 nlogk - k = # of products
     public static int fiveStarReviews(int[][] productRatings, int ratingsThreshold) {
         int count = 0;
-        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> myCompare(a,b, productRatings));
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> myCompare(a, b, productRatings));
         double rate = 0.0;
         int n = productRatings.length;
         for (int i = 0; i < n; i++) {
@@ -178,7 +214,7 @@ public class oa {
             productRatings[idx][1] += 1;
             pq.offer(idx);
         }
-        
+
         return count;
     }
 
@@ -191,7 +227,7 @@ public class oa {
     }
 
     private static double getImproveRate(int i, int[][] productRatings) {
-        double pre = 1.0 * productRatings[i][0]  / productRatings[i][1];
+        double pre = 1.0 * productRatings[i][0] / productRatings[i][1];
         double cur = (1.0 * productRatings[i][0] + 1) / (productRatings[i][1] + 1);
         return cur - pre;
     }
@@ -268,7 +304,7 @@ public class oa {
         Arrays.sort(cars);
         int len = Integer.MAX_VALUE;
         for (int i = k - 1; i < cars.length; i++) {
-            len = Math.min(len, cars[i] - cars[i-k+1] + 1);
+            len = Math.min(len, cars[i] - cars[i - k + 1] + 1);
         }
         return len;
     }
@@ -299,13 +335,13 @@ public class oa {
         int m = matrix.length;
         int n = matrix[0].length;
 
-        int[][] dp = new int[m+1][n+1];
+        int[][] dp = new int[m + 1][n + 1];
         int len = 0;
 
         for (int i = 1; i <= m; i++) {
             for (int j = 1; j <= n; j++) {
-                if (matrix[i-1][j-1] == '1') {
-                    dp[i][j] = 1 + Math.min(Math.min(dp[i-1][j], dp[i][j-1]), dp[i-1][j-1]);
+                if (matrix[i - 1][j - 1] == '1') {
+                    dp[i][j] = 1 + Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]);
                     len = Math.max(len, dp[i][j]);
                 }
             }
@@ -344,11 +380,11 @@ public class oa {
         int maxH = Math.max(horizontalCuts[0], h - horizontalCuts[horizontalCuts.length - 1]);
 
         for (int i = 1; i < verticalCuts.length; i++) {
-            maxW = Math.max(maxW, verticalCuts[i] - verticalCuts[i-1]);
+            maxW = Math.max(maxW, verticalCuts[i] - verticalCuts[i - 1]);
         }
 
         for (int i = 1; i < horizontalCuts.length; i++) {
-            maxH = Math.max(maxH, horizontalCuts[i] - horizontalCuts[i-1]);
+            maxH = Math.max(maxH, horizontalCuts[i] - horizontalCuts[i - 1]);
         }
         return (int) (1l * maxH * maxW % 1000000007);
     }
@@ -400,7 +436,7 @@ public class oa {
                 prefixSum[i] = count;
             } else {
                 count++;
-                prefixSum[i] = prefixSum[i-1];
+                prefixSum[i] = prefixSum[i - 1];
             }
         }
 
@@ -411,12 +447,93 @@ public class oa {
         return res;
     }
 
+    //1761
+    public static int minTrioDegree(int n, int[][] edges) {
+        int min = Integer.MAX_VALUE;
+        //node, degree
+        Map<Integer, Integer> map = new HashMap<>();
+        boolean[][] connected = new boolean[n + 1][n + 1];
+        for (int[] e : edges) {
+            map.put(e[0], map.getOrDefault(e[0], 0) + 1);
+            map.put(e[1], map.getOrDefault(e[1], 0) + 1);
+            connected[e[0]][e[1]] = true;
+            connected[e[1]][e[0]] = true;
+        }
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = i + 1; j <= n; j++) {
+                for (int k = j + 1; k <= n; k++) {
+                    if (connected[i][j] && connected[j][k] && connected[i][k]) {
+                        int cur = map.get(i) + map.get(j) + map.get(k) - 6;
+                        min = Math.min(cur, min);
+                    }
+                }
+            }
+        }
+        return min == Integer.MAX_VALUE ? -1 : min;
+    }
+    // spilt arr into leftSum > rightSum
+    public static int spiltIntoTwo(List<Integer> arr) {
+        int n = arr.size();
+        int count = 0;
+        int[] sum = new int[n];
+
+        sum[0] = arr.get(0);
+        for (int i = 1; i < n; i++) {
+            sum[i] = sum[i-1] + arr.get(i);
+        }
+
+        for (int i = 1; i < n-1; i++) {
+            if (sum[i] > sum[n-1] - sum[i+1]) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static String decodeString(int n, String encodedString) {
+        int len = encodedString.length();
+        int col = len / n;
+        char[][] chars = new char[n][col];
+        StringBuilder sb = new StringBuilder();
+        int idx = 0;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < col; j++) {
+                chars[i][j] = encodedString.charAt(idx++);
+            }
+        }
+
+        int r = 0;
+        int c = 0;
+        for (; c < col; c++) {
+            int x = c;
+            while (r < n && x < col) {
+                if (chars[r][x] != '_')
+                    sb.append(chars[r][x]);
+                else sb.append(" ");
+                r++;
+                x++;
+            }
+            r = 0;
+        }
+
+        return sb.toString();
+    }
+
     public static void main(String[] args) {
         // 315 547 355
 //        System.out.println(findSongs(90, Arrays.asList(1, 10, 25, 35, 60, 59, 59)));
-        int[][] mat = {{0,2},{2,9},{2,3},{3,6},{0,2}}; //
-        List<Integer> l = Arrays.asList(-2, -1, -2, 5);
-        System.out.println(Arrays.toString(itemInContainer("|**|*|*", new int[] {1, 1}, new int[] {5, 6})));
+        int[][] mat = {{1, 2}, {1, 3}, {3, 2}, {4, 1}, {5, 2}, {3, 6}};
+        List<Integer> l = Arrays.asList(10, 4, -8, 7);
+//        System.out.println(spiltIntoTwo(l));
+//        System.out.println(minTrioDegree(6, mat));
+        System.out.println(decodeString(3, "mnes__ya_____mi"));
+//        System.out.println(Arrays.toString(itemInContainer("|**|*|*", new int[] {1, 1}, new int[] {5, 6})));
+//        List<List<Integer>> l1 = Arrays.asList(Arrays.asList(1, 2000), Arrays.asList(2, 4000), Arrays.asList(3, 6000));
+//        List<List<Integer>> l2 = Arrays.asList(Arrays.asList(1, 2000));
+//        System.out.println(primeAirTime(l1, l2, 6000));
+//        System.out.println(primeAirTime());
 //        System.out.println(minimumDistance(mat));
 
 //        List<Integer> l1 = Arrays.asList(2,3,4,5,6,7,9);
