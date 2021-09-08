@@ -12,7 +12,7 @@ class PairString {
     }
 }
 
-public class oa {
+public class OA {
     // music pair
     public static List<Integer> findSongs(int rideDuration, List<Integer> songDurations) {
         List<Integer> res = new LinkedList<>();
