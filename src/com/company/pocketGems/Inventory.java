@@ -1,8 +1,16 @@
 package com.company.pocketGems;
 
-public class Inventory {
+import java.util.LinkedList;
+import java.util.List;
 
-/**
+class Item {
+
+    public boolean IsQuestItem() {
+        return true;
+    }
+}
+public class Inventory {
+    //if they are not intend to accessible out side the class, should define as private
     public List<Item> items; // in our current game design, each item is either a quest item or a normal item
     public List<Item> questItems; // for convenience, a subset of items, containing only quest items
     public List<Item> normalItems; // for convenience, a subset of items, containing only normal items
@@ -11,18 +19,18 @@ public class Inventory {
     private Item lastItemCollected;
 
     //init; should implement LinkedList because LinkedList has better performance in adding and removing elements
-    public Inventory(List<Item> items, List<Item> questItems, List<Item> normalItems, Item lastItemCollected) {
-        this.items = items;
-        this.questItems = questItems;
-        this.normalItems = normalItems;
-        this.lastItemCollected = lastItemCollected;
+    public Inventory() {
+        this.items = new LinkedList<>();
+        this.questItems = new LinkedList<>();
+        this.normalItems = new LinkedList<>();
+        this.lastItemCollected = null;
     }
 
-    public Item LastItemCollected() {
+    public Item LastItemCollected() { //getter naming
         return lastItemCollected;
     }
 
-    public void getitem(Item i, int quantity) { //naming standard
+    public void getitem(Item i, int quantity) { //naming standard // null check
         for(int x = 0; x < quantity; ++x) {
             items.add(i);
             if (i.IsQuestItem()) {
@@ -32,7 +40,7 @@ public class Inventory {
             }
         }
 
-        AchievementSystem.instance.DidModifyItem("gain", i.identifier, quantity);
+//        AchievementSystem.instance.DidModifyItem("gain", i.identifier, quantity);
         didpickupitem(i);
     }
 
@@ -47,11 +55,10 @@ public class Inventory {
             }
         }
 
-        AchievementSystem.instance.DidModifyItem("lose", i.identifier, quantity);
+//        AchievementSystem.instance.DidModifyItem("lose", i.identifier, quantity);
     }
 
     public void didpickupitem(Item i) {
         lastItemCollected = i;
     }
- **/
 }

@@ -61,21 +61,21 @@ public class OA {
 
     public int reductor(int[] a, int[] b, int d) {
 /**     //BF O(n*m) - TLE
-        if (a == null || b == null) return 0;
+ if (a == null || b == null) return 0;
 
-        int count = 0;
-        for (int i = 0; i < a.length; i++) {
-            int cur = 1;
-            for (int j = 0; j < b.length; j++) {
-                if (Math.abs(a[i] - b[j]) <= d) {
-                    cur = 0;
-                    break;
-                }
-            }
-            count += cur;
-        }
+ int count = 0;
+ for (int i = 0; i < a.length; i++) {
+ int cur = 1;
+ for (int j = 0; j < b.length; j++) {
+ if (Math.abs(a[i] - b[j]) <= d) {
+ cur = 0;
+ break;
+ }
+ }
+ count += cur;
+ }
 
-        return count;
+ return count;
  **/
 
         int count = 0;
@@ -85,7 +85,7 @@ public class OA {
             if (idx >= 0) continue; //found the same num -> abs == 0
             idx = -idx - 1;
             if ((idx == b.length || Math.abs(a[i] - b[idx]) > d)
-                    && (idx == 0 || Math.abs(a[i] - b[idx-1]) > d)) {
+                    && (idx == 0 || Math.abs(a[i] - b[idx - 1]) > d)) {
                 System.out.println(a[i]);
                 count++;
             }
@@ -93,11 +93,182 @@ public class OA {
         return count;
     }
 
+    //1761
+    public int bestTrio(int friendsNodes, List<Integer> friendsFrom, List<Integer> friendTo) {
+        boolean[][] connected = new boolean[friendsNodes + 1][friendsNodes + 1];
+        Map<Integer, Integer> map = new HashMap<>();
+        int n = friendsFrom.size();
 
+        for (int i = 0; i < n; i++) {
+            int a = friendsFrom.get(i);
+            int b = friendTo.get(i);
+            map.put(a, map.getOrDefault(a, 0) + 1);
+            map.put(b, map.getOrDefault(b, 0) + 1);
+            connected[a][b] = true;
+            connected[b][a] = true;
+        }
+
+        int min = Integer.MAX_VALUE;
+        for (int i = 1; i <= friendsNodes; i++) {
+            for (int j = i + 1; j <= friendsNodes; j++) {
+                for (int k = j + 1; k <= friendsNodes; k++) {
+                    if (connected[i][j] && connected[i][k] && connected[j][k]) {
+                        int cur = map.get(i) + map.get(j) + map.get(k) - 6;
+                        min = Math.min(min, cur);
+                    }
+                }
+            }
+        }
+
+        return min == Integer.MAX_VALUE ? -1 : min;
+    }
+
+
+    public int ways(int total, int k) {
+//        dp[8][2] = dp[7][2] + dp[8][1]
+        return -1;
+    }
+
+    //1143
+    public int longestCommonSubsequence(String text1, String text2) {
+        int m = text1.length();
+        int n = text2.length();
+        int[][] dp = new int[m + 1][n + 1];
+        //i == j dp[i][j] = 1 + dp[i-1][j-1]
+        //       dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (text1.charAt(i) == text2.charAt(j)) {
+                    dp[i + 1][j + 1] = 1 + dp[i][j];
+                } else {
+                    dp[i + 1][j + 1] = Math.max(dp[i + 1][j], dp[i][j + 1]);
+                }
+            }
+        }
+        return dp[m][n];
+    }
+
+    int res;
+
+    public int bestSumAnyTreePath(int[] parent, int[] value) {
+        TreeNode[] nodes = new TreeNode[parent.length];
+
+        for (int i = 0; i < parent.length; i++) {
+            TreeNode cur = new TreeNode(i, value[i]);
+            nodes[i] = cur;
+            if (parent[i] != -1) {
+                //input parent has to be valid
+                TreeNode root = nodes[parent[i]];
+                root.children.add(cur);
+            }
+        }
+        System.out.println(nodes[0]);
+        res = Integer.MIN_VALUE;
+        dfs(nodes[0]);
+
+        return res;
+    }
+
+    private int dfs(TreeNode root) {
+        if (root == null) return 0;
+
+        int first = Integer.MIN_VALUE;
+        int second = Integer.MIN_VALUE;
+        for (TreeNode next : root.children) {
+            int n = dfs(next);
+            if (n > first) {
+                second = first;
+                first = n;
+            } else if (n > second) {
+                second = n;
+            }
+        }
+
+        int maxNext = first == Integer.MIN_VALUE ? 0 : first;
+        int oneChildRoot = Math.max(root.weight, root.weight + maxNext);
+        int curRoot = Math.max(oneChildRoot, oneChildRoot + (second == Integer.MIN_VALUE ? 0 : second));
+
+        res = Math.max(res, curRoot);
+
+        return oneChildRoot;
+    }
+
+    public int jungleBook(int[] arr) {
+        int n = arr.length;
+        List<Integer>[] list = new List[n];
+        Queue<Integer> q = new LinkedList<>();
+
+        for (int i = 0; i < n; i++) {
+            if (arr[i] == -1) {
+                q.offer(i);
+            } else {
+                if (list[arr[i]] == null) {
+                    list[arr[i]] = new ArrayList<>();
+                }
+                list[arr[i]].add(i);
+            }
+        }
+
+        int depth = 0;
+
+        while (!q.isEmpty()) {
+            depth++;
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                int idx = q.poll();
+                if (list[idx] == null) continue;
+                for (int k : list[idx]) {
+                    q.offer(k);
+                }
+            }
+        }
+
+        return depth++;
+    }
+
+    //lc 740
+    public int deleteAndEarn(int[] nums) {
+        int n = 10001;
+        int[] values = new int[n];
+        for (int num : nums)
+            values[num] += num;
+
+        int take = 0, skip = 0;
+        for (int i = 0; i < n; i++) {
+            int takei = skip + values[i];
+            int skipi = Math.max(skip, take);
+            take = takei;
+            skip = skipi;
+        }
+        return Math.max(take, skip);
+    }
     public static void main(String[] args) {
         OA o = new OA();
-        System.out.println(o.reductor(new int[] {-100,13,20}, new int[] {1,4,13}, 3));
-//        System.out.println(Arrays.binarySearch(new int[] {1,2,5}, 0));
+        int[] p = {-1,0,1};
+        System.out.println( o.jungleBook(p));
     }
 }
 
+class TreeNode {
+    int val;
+    int weight;
+    List<TreeNode> children;
+
+    public TreeNode() {
+    }
+
+    public TreeNode(int val, int weight) {
+        this.val = val;
+        this.weight = weight;
+        this.children = new LinkedList<>();
+    }
+
+    @Override
+    public String toString() {
+        return "TreeNode{" +
+                "val=" + val +
+                ", weight=" + weight +
+                ", children=" + children +
+                '}';
+    }
+}
