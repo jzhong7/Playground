@@ -472,6 +472,7 @@ public class OA {
         }
         return min == Integer.MAX_VALUE ? -1 : min;
     }
+
     // spilt arr into leftSum > rightSum
     public static int spiltIntoTwo(List<Integer> arr) {
         int n = arr.size();
@@ -480,11 +481,11 @@ public class OA {
 
         sum[0] = arr.get(0);
         for (int i = 1; i < n; i++) {
-            sum[i] = sum[i-1] + arr.get(i);
+            sum[i] = sum[i - 1] + arr.get(i);
         }
 
-        for (int i = 1; i < n-1; i++) {
-            if (sum[i] > sum[n-1] - sum[i+1]) {
+        for (int i = 1; i < n - 1; i++) {
+            if (sum[i] > sum[n - 1] - sum[i + 1]) {
                 count++;
             }
         }
@@ -521,14 +522,316 @@ public class OA {
         return sb.toString();
     }
 
+    //lc 45 jump game
+    public static int jump(int[] nums) {
+        //[2,3,1,1,4]
+/** //O(n^2)
+ if (nums.length <= 1) return 0;
+ int n = nums.length;
+ int steps = 0;
+ boolean[] vis = new boolean[n];
+ Queue<Integer> q = new LinkedList<>();
+ q.add(0);
+ vis[0] = true;
+
+ while (!q.isEmpty()) {
+ steps++;
+ int size = q.size();
+ for (int i = 0; i < size; i++) {
+ int idx = q.poll();
+ for (int j = 1; j <= nums[idx]; j++) {
+ if (idx + j >= n - 1) return steps;
+ if (vis[idx + j]) continue;
+ q.add(idx + j);
+ vis[idx + j] = true;
+ }
+ }
+ }
+
+ return -1;
+ **/
+        // O(n)
+        int n = nums.length;
+        int curMax = 0;
+        int canReach = 0;
+        int steps = 0;
+
+        for (int i = 0; i < n - 1; i++) {
+            canReach = Math.max(canReach, i + nums[i]);
+            if (i == curMax) {
+                steps++;
+                curMax = canReach;
+            }
+        }
+        return steps;
+    }
+
+    //lc 200 follow up 305
+    public int numIslands(char[][] grid, List<int[]> island) {
+        int m = grid.length;
+        int n = m == 0 ? 0 : grid[0].length;
+        int count = 0;
+        char target = 'a';
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    dfs(grid, i, j, m, n, target++);
+                }
+            }
+        }
+
+        for (char[] c : grid) System.out.println(Arrays.toString(c));
+        System.out.println(count);
+
+        for (int[] i : island) {
+            int r = i[0];
+            int c = i[1];
+            int check = helper(grid, r, c);
+            if (check == 0) {
+                count++;
+            } else if (check > 1) {
+                count = count - check + 1;
+            }
+        }
+        System.out.println("---------");
+        for (char[] c : grid) System.out.println(Arrays.toString(c));
+
+        return count;
+    }
+
+    private int helper(char[][] grid, int r, int c) {
+        if (grid[r][c] != '0') return -1;
+        grid[r][c] = 'x';
+        Set<Character> set = new HashSet<>();
+        int[] dir = {0, 1, 0, -1, 0};
+        for (int i = 0; i < 4; i++) {
+            int x = r + dir[i];
+            int y = c + dir[i + 1];
+            if (x < 0 || y < 0 || x >= grid.length || y > grid[0].length) continue;
+            if (grid[x][y] != '0') {
+                set.add(grid[x][y]);
+            }
+        }
+        return set.size();
+    }
+
+    private void dfs(char[][] grid, int r, int c, int m, int n, char target) {
+        if (r < 0 || c < 0 || r >= m || c >= n) return;
+        if (grid[r][c] != '1') return;
+
+        grid[r][c] = target;
+        dfs(grid, r, c + 1, m, n, target);
+        dfs(grid, r + 1, c, m, n, target);
+        dfs(grid, r - 1, c, m, n, target);
+        dfs(grid, r, c - 1, m, n, target);
+    }
+
+    //lc1306 jump game III
+    public boolean canReach(int[] arr, int start) {
+        int n = arr.length;
+        boolean[] vis = new boolean[n];
+        Queue<Integer> q = new LinkedList<>();
+        q.add(start);
+        vis[start] = true;
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+                int idx = q.poll();
+                if (arr[idx] == 0) return true;
+                if (idx + arr[idx] < n && !vis[idx + arr[idx]]) {
+                    q.add(idx + arr[idx]);
+                    vis[idx + arr[idx]] = true;
+                }
+                if (idx - arr[idx] >= 0 && !vis[idx - arr[idx]]) {
+                    q.add(idx - arr[idx]);
+                    vis[idx - arr[idx]] = true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    //lc 739 daily temperatures
+    public static int[] dailyTemperatures(int[] temperatures) {
+        int n = temperatures.length;
+        int[] res = new int[n];
+        Deque<Integer> st = new ArrayDeque<>();
+
+        for (int i = 0; i < n; i++) {
+            while (!st.isEmpty() && temperatures[i] > temperatures[st.peekLast()]) {
+                int idx = st.pollLast();
+                res[idx] = i - idx;
+            }
+            st.addLast(i);
+        }
+        System.out.println(Arrays.toString(res));
+        return res;
+    }
+
+    //lc 871 minimum number of refueling stops
+    public static int minRefuelStops(int target, int startFuel, int[][] stations) {
+        if (startFuel >= target) return 0;
+
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+        int maxDis = startFuel;
+        int stops = 0;
+        int i = 0;
+
+        while (maxDis < target) {
+            while (i < stations.length && maxDis >= stations[i][0]) {
+                pq.offer(stations[i++][1]);
+            }
+            if (pq.isEmpty()) return -1; //can not reach to next station, station[i][0]
+            stops++;
+            maxDis += pq.poll();
+        }
+
+        return stops;
+    }
+
+    //lc 1345 jump game IV
+    public int minJumps(int[] arr) {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        int n = arr.length;
+        for (int i = 0; i < n; i++) {
+            List<Integer> list = map.getOrDefault(arr[i], new ArrayList<>());
+            list.add(i);
+            map.put(arr[i], list);
+        }
+
+        Queue<Integer> q = new LinkedList<>();
+        boolean[] vis = new boolean[n];
+        q.add(0);
+        vis[0] = true;
+        int steps = 0;
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int i = 0; i < size; i++) {
+                int idx = q.poll();
+                if (idx == n - 1) return steps;
+                for (int child : map.get(arr[idx])) {
+                    if (vis[child]) continue;
+                    q.add(child);
+                    vis[child] = true;
+                }
+                map.get(arr[idx]).clear();
+
+                if (idx - 1 > 0 && !vis[idx-1]) {
+                    q.add(idx-1);
+                    vis[idx-1] = true;
+                }
+
+                if (idx + 1 < n && !vis[idx+1]) {
+                    q.add(idx+1);
+                    vis[idx+1] = true;
+                }
+            }
+            steps++;
+        }
+
+        return -1;
+    }
+
+    //lc 695 max island area
+    public int maxAreaOfIsland(int[][] grid) {
+        int m = grid.length;
+        int n = m == 0 ? 0 : grid[0].length;
+        int area = 0;
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    int cur = dfs(grid, i, j, m, n);
+                    area = Math.max(area, cur);
+                }
+            }
+        }
+
+        return area;
+    }
+
+    public int dfs(int[][] grid, int i, int j, int m, int n) {
+        if (i < 0 || j < 0 || i >= m || j >= n) return 0;
+        if (grid[i][j] == 0) return 0;
+
+        grid[i][j] = 0;
+        return 1 + dfs(grid, i+1, j, m, n) + dfs(grid, i, j+1, m, n) +
+                dfs(grid, i-1, j, m, n) + dfs(grid, i, j-1, m, n);
+
+    }
+    //lc 273
+    private final String[] LESS_THAN_20 = {"", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"};
+    private final String[] TENS = {"", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"};
+    private final String[] THOUSANDS = {"", "Thousand", "Million", "Billion"};
+    public String numberToWords(int num) {
+        if (num == 0) return "Zero";
+
+        int i = 0;
+        String res = "";
+
+        while (num > 0) {
+            if (num % 1000 != 0) {
+                res = helper(num%1000) + THOUSANDS[i] + " " + res;
+            }
+            i++;
+            num /= 1000;
+        }
+
+        return res.trim();
+    }
+
+    private String helper(int num) {
+        if (num == 0) {
+          return "";
+        } else if (num < 20) {
+            return LESS_THAN_20[num] + " ";
+        } else if (num < 100) {
+            return TENS[num/10] + " " + helper(num%10);
+        } else {
+            return LESS_THAN_20[num/100] + " Hundred " + helper(num%100);
+        }
+    }
+
+    public List<Integer> getList(List<Integer> nums) {
+        if (nums == null || nums.size() == 0) return new ArrayList<>();
+        Map<Integer, Integer> map = new HashMap<>();
+        int lo = 0;
+        int len = 0;
+        int start = 0;
+
+        for (int hi = 0; hi < nums.size(); hi++) {
+            int n = nums.get(hi);
+            if (map.getOrDefault(n, -1) >= lo) {
+                lo = map.get(n) + 1;
+            }
+            if (len < hi - lo + 1) {
+                len = hi - lo + 1;
+                start = lo;
+            }
+
+            map.put(n, hi);
+        }
+
+        List<Integer> res = new ArrayList<>();
+        for (int i = start; i < start+len; i++) {
+            res.add(nums.get(i));
+        }
+        return res;
+    }
+
     public static void main(String[] args) {
         // 315 547 355
 //        System.out.println(findSongs(90, Arrays.asList(1, 10, 25, 35, 60, 59, 59)));
         int[][] mat = {{1, 2}, {1, 3}, {3, 2}, {4, 1}, {5, 2}, {3, 6}};
-        List<Integer> l = Arrays.asList(10, 4, -8, 7);
+        List<Integer> l = Arrays.asList(1,1,2,3,4,5,6,7,9,7,8,9,10,11,12,13,1,2,3,4,5,6,7,8);
+        System.out.println(new OA().getList(l));
 //        System.out.println(spiltIntoTwo(l));
 //        System.out.println(minTrioDegree(6, mat));
-        System.out.println(decodeString(3, "mnes__ya_____mi"));
+//        System.out.println(decodeString(3, "mnes__ya_____mi"));
 //        System.out.println(Arrays.toString(itemInContainer("|**|*|*", new int[] {1, 1}, new int[] {5, 6})));
 //        List<List<Integer>> l1 = Arrays.asList(Arrays.asList(1, 2000), Arrays.asList(2, 4000), Arrays.asList(3, 6000));
 //        List<List<Integer>> l2 = Arrays.asList(Arrays.asList(1, 2000));
@@ -542,5 +845,157 @@ public class OA {
 //        List<Integer> l4 = Arrays.asList(1,2);
 //
 //        System.out.println(getNumberOfOptions(l1, l2, l3, l4, 25));
+        char[][] chars = {{'A', 'B', 'C', 'E', '0'},
+                {'S', 'F', 'C', 'S', '0'},
+                {'A', 'D', 'E', 'E', '1'},
+                {'1', '0', '0', '0', 'X'}};
+//        List<int[]> list = Arrays.asList(new int[] {2,2});
+        System.out.println(new OA().numberToWords(123));
+
+    }
+}
+//lc 353
+class SnakeGame {
+    Set<String> snake;
+    Queue<int[]> q;
+    int[][] food;
+    int eaten;
+    int m;
+    int n;
+    int x;
+    int y;
+    public SnakeGame(int width, int height, int[][] food) {
+        int x = 0;
+        int y = 0;
+        this.snake = new HashSet<>();
+        snake.add(x + "-" + y);
+        this.q = new LinkedList<>();
+        q.offer(new int[] {x, y});
+        this.eaten = 0;
+        this.m = height;
+        this.n = width;
+        this.food = food;
+    }
+
+    public int move(String direction) {
+        if (direction.equals("U")) {
+            x--;
+        } else if (direction.equals("D")) {
+            x++;
+        } else if (direction.equals("L")) {
+            y--;
+        } else if (direction.equals("R")) {
+            y++;
+        }
+
+        if (x < 0 || y < 0 || x >= m || y >= n) return -1;
+
+        return moveTo(x,y);
+    }
+
+    private int moveTo(int x, int y) {
+        if (eaten == food.length) {
+            snake.remove(q.peek()[0] + "-" + q.peek()[1]);
+            q.poll();
+        } else if (x == food[eaten][0] && y == food[eaten][1]) {
+            eaten++;
+        } else {
+            snake.remove(q.peek()[0] + "-" + q.peek()[1]);
+            q.poll();
+        }
+        if (snake.contains(x + "-" + y)) return -1;
+
+        q.offer(new int[] {x, y});
+        snake.add(x + "-" + y);
+
+        return eaten;
+    }
+
+    //lc 207 course schedule
+    public boolean canFinish(int numCourses, int[][] prerequisites) {
+        int[] in = new int[numCourses];
+        List<Integer>[] out = new List[numCourses];
+
+        for (int i = 0; i < numCourses; i++) {
+            out[i] = new ArrayList<>();
+        }
+
+        for(int[] p : prerequisites) {
+            in[p[0]]++; //number of requirement
+            out[p[1]].add(p[0]); // next-class-list
+        }
+
+        Stack<Integer> st = new Stack<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (in[i] == 0) {
+                st.push(i);
+            }
+        }
+        List<Integer> res = new LinkedList<>();
+        while (!st.isEmpty()) {
+            int idx = st.pop();
+            res.add(idx);
+            for (int n : out[idx]) {
+                in[n]--;
+                if (in[n] == 0) {
+                    st.push(n);
+                }
+            }
+        }
+        return res.size() == numCourses;
+    }
+
+    //lc 210 course schedule II
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        List<Integer> res = new ArrayList<>();
+        int[] degree = new int[numCourses];
+        List<Integer>[] sub = new List[numCourses];
+        for (int i = 0; i < numCourses; i++) {
+            sub[i] = new ArrayList<>();
+        }
+
+        for (int[] p : prerequisites) {
+            degree[p[0]]++;
+            sub[p[1]].add(p[0]);
+        }
+
+        Queue<Integer> q = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (degree[i] == 0) {
+                q.offer(i);
+            }
+        }
+
+        while (!q.isEmpty()) {
+            int idx = q.poll();
+            res.add(idx);
+            for (int next : sub[idx]) {
+                degree[next]--;
+                if (degree[next] == 0) {
+                    q.offer(next);
+                }
+            }
+        }
+        if (res.size() < numCourses) return null;
+
+        int[] arr = new int[res.size()];
+        for (int i = 0; i < res.size(); i++) {
+            arr[i] = res.get(i);
+        }
+        return arr;
+
+    }
+
+    public static void main(String[] args) {
+        int[][] food = {{1,2},{0,1}};
+        SnakeGame snake = new SnakeGame(3, 2, food);
+        //0,0,1,1,2,-1
+        System.out.println(snake.move("R"));
+        System.out.println(snake.move("D"));
+        System.out.println(snake.move("R"));
+        System.out.println(snake.move("U"));
+        System.out.println(snake.move("L"));
+        System.out.println(snake.move("U"));
+
     }
 }
