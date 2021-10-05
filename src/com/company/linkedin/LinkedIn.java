@@ -1,5 +1,7 @@
 package com.company.linkedin;
 
+import com.company.TreeNode;
+
 import java.math.BigInteger;
 import java.util.*;
 
@@ -67,7 +69,6 @@ public class LinkedIn {
     //lc339 lint551 Nested List Weight Sum I - BFS/DFS
     //lc364 lint905 Nested List Weight Sum II
 
-    //lc716 lint859 Max Stack
     //lc1611 Minimum One Bit Operations to Make Integers Zero - hard - dp, bit operation
 
     //lc380 lc381 Insert Delete GetRandom O(1) - with/without Duplicates
@@ -96,9 +97,56 @@ public class LinkedIn {
         return res;
     }
 
-    //lc432 lc297 lc200
+    //lc432 lc297
+    // lc200 return number of island with city,  water - 0, island - 1, city - 2
+    public int numIslands(int[][] grid) {
+        if (grid == null) return 0;
+        int m = grid.length;
+        int n = grid[0].length;
+        int count = 0;
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 2) {
+                    count++;
+                    dfsHelper(grid, i , j, m, n);
+                }
+            }
+        }
+        return count;
+    }
+
+    private void dfsHelper(int[][] grid, int i, int j, int m, int n) {
+        if (i < 0 || j < 0 || i >= m || j >= n || grid[i][j] == 0) return;
+        grid[i][j] = 0;
+        dfsHelper(grid, i+1 , j, m, n);
+        dfsHelper(grid, i , j+1, m, n);
+        dfsHelper(grid, i , j-1, m, n);
+        dfsHelper(grid, i-1 , j, m, n);
+
+    }
 
     //lc366 lint650 · Find Leaves of Binary Tree
+    public List<List<Integer>> findLeaves(TreeNode root) {
+        // write your code here
+        List<List<Integer>> res = new ArrayList<>();
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        int depth = dfs(root, map);
+        for (int i = 1; i <= depth; i++) {
+            res.add(map.get(i));
+        }
+        System.out.println(map);
+        return res;
+    }
+
+    private int dfs(TreeNode root, Map<Integer, List<Integer>> map) {
+        if (root == null) return 0;
+        int d = Math.max(dfs(root.left, map), dfs(root.right, map)) + 1;
+        List<Integer> cur = map.getOrDefault(d, new ArrayList<>());
+        cur.add(root.val);
+        map.put(d, cur);
+        return d;
+    }
 
     //lc605
     public boolean canPlaceFlowers(int[] flowerbed, int n) {
@@ -115,7 +163,7 @@ public class LinkedIn {
 
     //lc706 implement hashmap
 
-    //lc149
+    //lc149 Max Points on a Line
     public int maxPoints(int[][] points) {
         if (points == null || points.length == 0) return 0;
         if (points.length <= 2) return points.length;
@@ -205,7 +253,7 @@ public class LinkedIn {
         return res;
     }
 
-    //lc698
+    //lc698 k sub-array with equal sum
     public boolean canPartitionKSubsets(int[] nums, int k) {
         int sum = 0;
         for (int n : nums) {
@@ -236,7 +284,7 @@ public class LinkedIn {
 
     //lc215
     public int findKthLargest(int[] nums, int k) {
-        return qs(nums, k, 0, nums.length-1);
+        return qs(nums, k, 0, nums.length - 1);
     }
 
     private int qs(int[] nums, int k, int lo, int hi) {
@@ -244,8 +292,8 @@ public class LinkedIn {
         System.out.println(Arrays.toString(nums));
         System.out.println(n + " " + nums[n]);
         if (n + 1 == k) return nums[n];
-        else if (n + 1 > k) return qs(nums, k, lo, n-1);
-        return qs(nums, k, n+1, hi);
+        else if (n + 1 > k) return qs(nums, k, lo, n - 1);
+        return qs(nums, k, n + 1, hi);
     }
 
     private int partition(int[] nums, int lo, int hi) {
@@ -259,9 +307,9 @@ public class LinkedIn {
         while (p1 < p2) {
             while (p1 < p2 && nums[p2] <= pivot) p2--;
             while (p1 < p2 && nums[p1] >= pivot) p1++;
-            swap(nums,p1,p2);
+            swap(nums, p1, p2);
         }
-        swap(nums,lo,p1);
+        swap(nums, lo, p1);
 
         return p1;
     }
@@ -278,17 +326,17 @@ public class LinkedIn {
         int[][] dp = new int[n][n];
         char[] c = s.toCharArray();
 //        dp[i][j] = dp[i+1][j-1] + 2  || dp[i][j] = max(dp[i+1][j], dp[i][j-1])
-        for (int i = n-1; i >= 0; i--) {
+        for (int i = n - 1; i >= 0; i--) {
             dp[i][i] = 1;
-            for (int j = i+1; j < n; j++) {
+            for (int j = i + 1; j < n; j++) {
                 if (c[i] == c[j]) {
-                    dp[i][j] = dp[i+1][j-1] + 2;
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
                 } else {
-                    dp[i][j] = Math.max(dp[i+1][j], dp[i][j-1]);
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
                 }
             }
         }
-        return dp[0][n-1];
+        return dp[0][n - 1];
     }
 
     //lc65 vail number
@@ -304,7 +352,7 @@ public class LinkedIn {
                 if (eSeen) numberAfterE = true;
                 if (!eSeen) numBeforeE = true;
             } else if (c == '+' || c == '-') {
-                if (i != 0 && s.charAt(i-1) != 'e') return false;
+                if (i != 0 && s.charAt(i - 1) != 'e') return false;
             } else if (c == '.') {
                 if (dotSeen || eSeen) return false;
                 dotSeen = true;
@@ -319,10 +367,381 @@ public class LinkedIn {
         return eSeen ? (numBeforeE && numberAfterE) : numBeforeE;
     }
 
+    //lc 249 lintcode 922
+    public List<List<String>> groupStrings(String[] strings) {
+        if (strings == null || strings.length == 0) {
+            return new LinkedList<>();
+        }
+        List<List<String>> res = new ArrayList<>();
+        Map<String, List<String>> map = new HashMap<>();
+        for (String s : strings) {
+            String key = getKey(s);
+            List<String> list = map.getOrDefault(key, new ArrayList<>());
+            list.add(s);
+            map.put(key, list);
+        }
+        res.addAll(map.values());
+        return res;
+    }
 
+    private String getKey(String s) {
+        String res = "";
+        int diff = s.charAt(0) - 'a';
+        for (int i = 0; i < s.length(); i++) {
+            char c = (char) (s.charAt(i) - diff);
+            if (c < 'a') {
+                c += 26;
+            }
+            res += c;
+        }
+        return res;
+    }
+
+    //lc 205
+    public boolean isIsomorphic(String s, String t) {
+        if (s.length() != t.length()) return false;
+        Map<Character, Character> map = new HashMap<>();
+        for (int i = 0; i < s.length(); i++) {
+            char a = s.charAt(i);
+            char b = t.charAt(i);
+            if (map.containsKey(a) && map.get(a) != b) {
+                return false;
+            }
+            if (!map.containsKey(a)) {
+                if (map.containsValue(b)) {
+                    return false;
+                }
+
+                map.put(a, b);
+            }
+        }
+
+        return true;
+    }
+
+    //lc 156 lintcode 649
+    public TreeNode upsideDownBinaryTree(TreeNode root) {
+        if (root == null || root.left == null) return root;
+
+        TreeNode node = upsideDownBinaryTree(root.left);
+        root.left.left = root.right;
+        root.left.right = root;
+        root.left = null;
+        root.right = null;
+        return node;
+    }
+
+    //lc 1197 Minimum Knight Moves
+    public int minKnightMoves(int x, int y) {
+        if (x == 0 && y == 0) return 0;
+        // board is symmetric
+        x = Math.abs(x);
+        y = Math.abs(y);
+        int[] dx = {2,2,-2,-2,1,1,-1,-1};
+        int[] dy = {1,-1,1,-1,2,-2,2,-2};
+        Set<String> vis = new HashSet<>();
+        Queue<int[]> q = new LinkedList<>();
+        q.add(new int[] {0, 0});
+        vis.add(0 + "-" + 0);
+
+        int steps = 0;
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+                int[] cur = q.poll();
+                if (cur[0] == x && cur[1] == y) return steps;
+                for (int i = 0; i < dx.length; i++) {
+                    int r = cur[0] + dx[i];
+                    int c = cur[1] + dy[i];
+                    if (r < 0 || c < 0 || r >= 310 || c >= 310) continue;
+                    if (!vis.contains(r + "-" + c)) {
+                        q.add(new int[] {r, c});
+                        vis.add(r + "-" + c);
+                    }
+                }
+            }
+            steps++;
+        }
+
+        return -1;
+    }
+
+    //lc 761
+    public String makeLargestSpecial(String s) {
+        //1.找出特殊二进制序列中的特殊子串
+        if (s.length() <= 2) return s;//结束条件
+        List<String> list = new ArrayList<>();//用来存储连续的字串，并且符合要求的子串必须是1开头0结尾
+        StringBuilder sb = new StringBuilder();
+        int start = 0;//用来声明下一个特殊字串开始的位置
+        int count = 0;//计数器，通过记录子1和0的数量判断是否为一个特殊子串
+        for (int i = 0; i < s.length(); i++) {
+            count += s.charAt(i) == '1' ? 1 : -1;//每逢1则计数器+1，逢0则减一
+            if (count == 0) {//当count等于0时，说明得到一个特殊的二进制序列
+                String str = s.substring(start + 1, i);//获得去除首尾后的子序列，形成递归
+                String result = makeLargestSpecial(str);//对子序列求字典序排列
+                list.add("1" + result + "0");//对子序列添加之前去除的首尾1和0，并存储到list集合中
+                start = i + 1;//start为下一个特殊子串开始的位置
+            }
+        }
+        //2.将特殊子串按照字典序排列
+        //toArray()方法会返回List中所有元素构成的数组
+        //toArray[T[] a]方法会返回List中所有元素构成的指定类型的数组
+        String[] arr = list.toArray(new String[list.size()]);
+        // System.out.println(list);
+        quickSort(arr, 0, arr.length - 1);//对数组中的特殊子串进行快速排序
+        //由于快排后为从小到大，所以再进行逆序
+        for (int i = arr.length - 1; i >= 0; i--) {
+            sb.append(arr[i]);
+        }
+        // System.out.println("ans " + sb.toString());
+        return sb.toString();//返回排序后的字符串
+    }
+
+    //快速排序
+    public void quickSort(String[] arr, int low, int high) {
+        if (low >= high) return;
+        int p1 = low;
+        int p2 = high;
+        String base = arr[low];
+        while (p1 < p2) {
+            while (p1 < p2 && arr[p2].compareTo(base) >= 0) {
+                p2--;
+            }
+            while (p1 < p2 && arr[p1].compareTo(base) <= 0) {
+                p1++;
+            }
+
+            swap(arr, p1, p2);
+        }
+        swap(arr, low, p1);
+        quickSort(arr, low, p1 - 1);
+        quickSort(arr, p1 + 1, high);
+    }
+
+    private void swap(String[] arr, int i, int j) {
+        String t = arr[i];
+        arr[i] = arr[j];
+        arr[j] = t;
+    }
+
+    //lc 53
+    public int maxSubArray(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        int res = nums[0];
+        for (int i = 1; i < nums.length; i++) {
+            nums[i] = Math.max(nums[i], nums[i] + nums[i-1]); //maximum subarray ending with A[i]
+            res = Math.max(res, nums[i]);
+        }
+
+        return res;
+    }
 
     public static void main(String[] args) {
         LinkedIn phoneScreening = new LinkedIn();
-        System.out.println(phoneScreening.isNumber("ASDe12E33"));
+        int[][] mat = {
+                {1,2,1,0,0,0},
+                {1,1,0,0,0,0},
+                {0,0,0,0,1,0},
+                {1,2,1,1,2,1}
+        };
+        System.out.println(phoneScreening.numIslands(mat));
+
     }
+}
+
+//lc 380
+class RandomizedSet {
+    List<Integer> list;
+    Random rd;
+    Map<Integer, Integer> map;
+
+    /**
+     * Initialize your data structure here.
+     */
+    public RandomizedSet() {
+        this.list = new ArrayList<>();
+        this.rd = new Random();
+        this.map = new HashMap<>(); //<val, index>
+    }
+
+    /**
+     * Inserts a value to the set. Returns true if the set did not already contain the specified element.
+     */
+    public boolean insert(int val) {
+        if (map.containsKey(val)) return false;
+        int idx = list.size();
+        map.put(val, idx);
+        list.add(val);
+        return true;
+    }
+
+    /**
+     * Removes a value from the set. Returns true if the set contained the specified element.
+     */
+    public boolean remove(int val) {
+        if (!map.containsKey(val)) return false;
+        int idx = map.get(val);
+        int last = list.size() - 1; // last idx
+        if (last != idx) {
+            map.put(list.get(last), idx);
+            list.set(idx, list.get(last));
+        }
+        list.remove(last);
+        map.remove(val);
+        return true;
+    }
+
+    /**
+     * Get a random element from the set.
+     */
+    public int getRandom() {
+        return list.get(rd.nextInt(list.size()));
+    }
+}
+
+//716 max stack lintcode 859
+class MaxStack {
+    Stack<Integer> st;
+    Stack<Integer> maxSt;
+    public MaxStack() {
+        st = new Stack<>();
+        maxSt = new Stack<>();
+    }
+
+    public void push(int x) {
+        int max = maxSt.isEmpty() ? x : Math.max(x, peekMax());
+        maxSt.push(max);
+        st.push(x);
+    }
+
+    public int pop() {
+        maxSt.pop();
+        return st.pop();
+    }
+
+    public int top() {
+        return st.peek();
+    }
+
+    public int peekMax() {
+        // write your code here
+        return maxSt.peek();
+    }
+
+    public int popMax() {
+        // write your code here
+        int max = peekMax();
+        Stack<Integer> temp = new Stack<>();
+        while (st.peek() != max) {
+            temp.push(pop());
+        }
+        pop();
+        while (!temp.isEmpty()) {
+            push(temp.pop());
+        }
+        return max;
+    }
+}
+
+//lc 642 autocomplete
+class AutocompleteSystem {
+    class TrieNode {
+        public boolean isLeaf;
+        public List<String> cands;
+        HashMap<Character, TrieNode> children;
+        public TrieNode() {
+            isLeaf = false;
+            children = new HashMap<Character, TrieNode>();
+            cands = new LinkedList<String>();
+        }
+    }
+    class Trie {
+        private TrieNode root;
+        public Trie() {
+            root = new TrieNode();
+        }
+        // Inserts a word into the trie.
+        public void insert(String word) {
+            TrieNode node = root;
+            for (int i = 0; i < word.length(); i ++) {
+                HashMap<Character, TrieNode> children = node.children;
+                char c = word.charAt(i);
+                if (!children.containsKey(c)) {
+                    children.put(c, new TrieNode());
+                }
+                children.get(c).cands.add(word);
+                if (i == word.length() - 1) {
+                    children.get(c).isLeaf = true;
+                }
+                node = node.children.get(c);
+            }
+        }
+        private TrieNode searchNode(String pre) {
+            HashMap<Character, TrieNode> children = root.children;
+            TrieNode node = root;
+            for (int i = 0; i < pre.length(); i ++) {
+                if (!children.containsKey(pre.charAt(i))) {
+                    return null;
+                }
+                node = children.get(pre.charAt(i));
+                children = node.children;
+            }
+            return node;
+        }
+    }
+    HashMap<String, Integer> count = new HashMap<String, Integer>();
+    Trie trie = new Trie();
+    String curr = "";
+    public AutocompleteSystem(String[] sentences, int[] times) {
+        for (int i = 0; i < sentences.length; i ++) {
+            count.put(sentences[i], times[i]);
+            trie.insert(sentences[i]);
+        }
+    }
+
+    public List<String> input(char c) {
+        List<String> res = new LinkedList<String>();
+        if (c == '#') {
+            if (!count.containsKey(curr)) {
+                trie.insert(curr);
+                count.put(curr, 1);
+            }
+            else {
+                count.put(curr, count.get(curr) + 1);
+            }
+            curr = "";
+        }
+        else {
+            curr += c;
+            res = getSuggestions();
+        }
+
+        return res;
+    }
+    private List<String> getSuggestions() {
+        List<String> res = new LinkedList<String>();
+        TrieNode node = trie.searchNode(curr);
+        if (node == null) {
+            return res;
+        }
+        List<String> cands = node.cands;
+        Collections.sort(cands, new Comparator<String>(){
+            public int compare(String s1, String s2) {
+                if (count.get(s1) != count.get(s2)) {
+                    return count.get(s2) - count.get(s1);
+                }
+                return s1.compareTo(s2);
+            }
+        });
+        int added = 0;
+        for (String s:cands) {
+            res.add(s);
+            added ++;
+            if (added > 2) {
+                break;
+            }
+        }
+        return res;
+    }
+
 }
