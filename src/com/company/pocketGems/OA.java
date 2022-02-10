@@ -150,6 +150,7 @@ public class OA {
 
     int res;
 
+    //build n-ary tree
     public int bestSumAnyTreePath(int[] parent, int[] value) {
         TreeNode[] nodes = new TreeNode[parent.length];
 
@@ -242,10 +243,149 @@ public class OA {
         }
         return Math.max(take, skip);
     }
+
+    public List<Integer> deliverySystem(int cityNode, int[] cityFrom, int[] cityTo, int company) {
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        for (int i = 0; i < cityFrom.length; i++) {
+            List<Integer> list = map.getOrDefault(cityFrom[i], new ArrayList<>());
+            list.add(cityTo[i]);
+            map.put(cityFrom[i], list);
+        }
+
+        Queue<Integer> q = new LinkedList<>(); // sort?
+        q.add(company);
+        List<Integer> res = new ArrayList<>();
+        boolean[] vis = new boolean[cityNode+1];
+        vis[company] = true;
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+                int node = q.poll();
+                List<Integer> cur = map.getOrDefault(node, new ArrayList<>());
+                Collections.sort(cur);
+                for (int next : cur) {
+                    if (!vis[next]) {
+                        res.add(next);
+                        q.add(next);
+                        vis[next] = true;
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        Deque<Integer> deque = new ArrayDeque<>();
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int n : nums2) {
+            while (!deque.isEmpty() && n > deque.peekLast()) map.put(deque.pollLast(), n);
+            deque.addLast(n);
+        }
+
+        for (int i = 0; i < nums1.length; i++) {
+            nums1[i] = map.getOrDefault(nums1[i], -1);
+        }
+        return nums1;
+    }
+    public int[] nextGreaterElements(int[] nums) {
+        int n = nums.length;
+        int[] res = new int[n];
+        Arrays.fill(res, -1);
+        Deque<Integer> deque = new ArrayDeque<>();
+
+        for (int i = 0; i < 2*n; i++) {
+            while (!deque.isEmpty() && nums[i%n] > nums[deque.peekLast()]) {
+                res[deque.pollLast()] = nums[i%n];
+            }
+            deque.addLast(i%n);
+        }
+        return res;
+    }
+    public String expressionExpand(String s) {
+        Queue<Character> q = new LinkedList<>();
+        for (char c : s.toCharArray()) q.add(c);
+        return expressionExpand(q);
+    }
+    public String expressionExpand(Queue<Character> q) {
+        // write your code here
+        if (q == null || q.isEmpty()) return null;
+        StringBuilder sb = new StringBuilder();
+        int num = 0;
+        while (!q.isEmpty()) {
+            char c = q.poll();
+            if (Character.isDigit(c)) {
+                num = num * 10 + (c -'0');
+            } else if (c == '[') {
+                String next = expressionExpand(q);
+                for (int k = 0; k < num; k++) {
+                    sb.append(next);
+                }
+                num = 0;
+            } else if (c == ']') {
+                return sb.toString();
+            } else {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public String fractionToDecimal(int numerator, int denominator) {
+        // write your code here
+        if (numerator == 0) return "0";
+        StringBuilder sb = new StringBuilder();
+
+        //sign
+        sb.append(((numerator < 0) ^ (denominator < 0)) ? "-" : "");
+
+        int num = Math.abs(numerator);
+        int den = Math.abs(denominator);
+        sb.append(num/den);
+        num %= den;
+        if (num == 0) return sb.toString();
+
+        sb.append(".");
+        Map<Integer, Integer> map = new HashMap<>(); // k,v -> cur remainder, idx
+        map.put(num, sb.length());
+        while (num != 0) {
+            num *= 10;
+            sb.append(num/den);
+            num %= den;
+            if (map.containsKey(num)) {
+                sb.insert(map.get(num), "(");
+                sb.append(")");
+                return sb.toString();
+            }
+            map.put(num, sb.length());
+        }
+        return sb.toString();
+    }
+
+    public int getNumber(int k, List<Integer> scores) {
+        if (k >= scores.size()) return scores.size();
+        TreeMap<Integer, Integer> map = new TreeMap<>((a,b) -> b - a);
+        for (int s : scores) {
+            map.put(s, map.getOrDefault(s, 0) + 1);
+        }
+        int count = 0;
+
+        for (int key : map.keySet()) {
+//            System.out.println(key);
+            count += map.get(key);
+            k--;
+            if (k == 0) return count;
+        }
+        return count;
+    }
     public static void main(String[] args) {
         OA o = new OA();
-        int[] p = {-1,0,1};
-        System.out.println( o.jungleBook(p));
+
+        int[] a = {1,1,2,3,1};
+        int[] b = {2,3,4,5,5};
+        System.out.println(o.getNumber(3, Arrays.asList(1,1,1,2,2)));
     }
 }
 
@@ -270,5 +410,177 @@ class TreeNode {
                 ", weight=" + weight +
                 ", children=" + children +
                 '}';
+    }
+}
+
+/**
+
+ You are asked to cut off trees in a forest for a golf event. The forest is represented as a non-negative 2D map, in this map:
+ 1  0 represents a pond can't be reached.
+ 2  1 represents the ground can be walked through.
+ 3  > 1 represents a tree can be walked through, and this positive number represents the tree's height.
+ In one step you can walk in any of the four directions top, bottom, left and right also when standing in a point which is a tree you can decide whether or not to cut off the tree.
+ You are asked to cut off all the trees in this forest in the order of tree's height.
+ You will start from the point (0, 0) and you should output the minimum steps you need to walk to cut off all the trees.
+
+
+ [1, 0, 1],
+ [0, 2, 0]
+
+ 1
+
+ */
+
+
+
+/*
+ * To execute Java, please define "static void main" on a class
+ * named Solution.
+ *
+ * If you need more classes, simply define them inline.
+ */
+
+class Tree {
+    int x;
+    int y;
+    int height;
+
+    public Tree(int x, int y, int height) {
+        this.x = x;
+        this.y = y;
+        this.height = height;
+    }
+}
+
+class Point {
+    int x;
+    int y;
+    int step;
+    boolean visited;
+    public Point(int x, int y, int step) {
+        this.x = x;
+        this.y = y;
+        this.step = step;
+    }
+
+    public String toString() {
+
+        return String.valueOf(x) + String.valueOf(y) + String.valueOf(step);
+    }
+
+}
+
+class Solution {
+    public int cutTree(int[][] map) {
+        int res = 0;
+        List<Tree> trees = new ArrayList<>();
+        for(int i = 0; i < map.length; i++) {
+            for(int j = 0; j < map[0].length; j++) {
+                if(map[i][j] > 1) {
+                    Tree t = new Tree(i, j, map[i][j]);
+                    trees.add(t);
+                }
+            }
+        }
+
+        Collections.sort(trees,(t1, t2) -> t1.height - t2.height);
+
+
+
+        int s = getStep(new Tree(0,0,1), trees.get(0), map);
+        if(s == -1) {
+            return -1;
+        }
+
+
+        res += s;
+
+        for(int i = 0; i < trees.size() - 1; i++) {
+            int step =  getStep(trees.get(i), trees.get(i + 1), map);
+            if(step == -1) {
+                return -1;
+            }
+            res += step;
+        }
+
+        return res;
+
+    }
+
+    private int getStep(Tree t1, Tree t2, int[][] map) {
+        int res = Integer.MAX_VALUE;
+        int l = map.length;
+        int w = map[0].length;
+        Queue<Point> queue = new LinkedList<Point>();
+        int[] dr1 = new int[]{1, -1, 0, 0};
+        int[] dr2 = new int[]{0, 0, 1, -1};
+        int[] visited = new int[l * w];
+
+        queue.offer(new Point(t1.x, t1.y, 0));
+        visited[t1.x * w + t1.y] = 1;
+        while(!queue.isEmpty()) {
+            int size = queue.size();
+            for(int i = 0; i < size; i++) {
+                Point p = queue.poll();
+                // System.out.println(p);
+                for(int k = 0; k < 4; k++) {
+                    int x = p.x + dr1[k];
+                    int y = p.y + dr2[k];
+
+                    if(x == t2.x && y == t2.y && p.step + 1 < res) {
+                        res = p.step + 1;
+                    }
+
+                    if(x >= 0 && x < map.length && y >= 0 && y < map[0].length && map[x][y] > 0 && visited[x * w + y] == 0 ) {
+                        queue.offer(new Point(x, y, p.step + 1));
+                        visited[x * w + y] = 1;
+                    }
+                }
+            }
+        }
+
+        if(res == Integer.MAX_VALUE) {
+            return -1;
+        }
+        return res;
+
+    }
+
+
+    //   [1, 0, 1],
+// [0, 2, 0]
+    public static void main(String[] args) {
+        int[][] map = new int[][] {
+                {1,1,1}, {0,2,0}
+        };
+
+
+        int[][] A = new int[][] {{1,1,1}
+                                ,{1,0,2}
+                                ,{2,1,1}};
+
+        int[][] B = new int[][] {{1}};
+        int[][] C = new int[][] {{2}};
+
+        int[][] D = new int[][] {{4,0,1}
+                ,{1,2,1}
+                ,{1,1,3}};
+
+        int[][] E = new int[][] {{1,0,1}
+                ,{1,0,1}
+                ,{1,0,3}};
+
+        int[][] F = new int[][] {{1,0,1,1,0,1}
+                ,{1,0,1,1,0,1}
+                ,{1,0,3,1,1,4}};
+
+
+        System.out.println(new Solution().cutTree(A));
+        // System.out.println(new Solution().cutTree(B));
+        // System.out.println(new Solution().cutTree(C));
+//        System.out.println(new Solution().cutTree(D));
+//        System.out.println(new Solution().cutTree(E));
+//        System.out.println(new Solution().cutTree(F));
+
     }
 }

@@ -4030,9 +4030,9 @@ e   o   ne  no
 
         for (String s : reviews) {
             String[] strs = s.replaceAll("[^a-zA-Z ]", " ")
-                                .toLowerCase()
-                                .trim()
-                                .split("\\s+");
+                    .toLowerCase()
+                    .trim()
+                    .split("\\s+");
             set = new HashSet<>();
             for (String str : strs) {
                 if (map.containsKey(str) && set.add(str)) {
@@ -4055,26 +4055,9 @@ e   o   ne  no
 
         return res;
     }
-    public static void main(String[] args) {
-        ListNode n1 = new ListNode(1);
-        ListNode n2 = new ListNode(2);
-        ListNode n3 = new ListNode(3);
-        n1.next = n2;
-        n2.next = n3;
-        System.out.println(n1);
-        test(n1);
-        System.out.println(n1);
-        n1 = null;
-        System.out.println(n1);
-    }
-
-    private static void test(ListNode n1) {
-        n1 = null;
-        System.out.println(" ----" + n1);
-    }
-
 
     List<List<String>> ans = new LinkedList<>();
+
     public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) {
         if (!wordList.contains(endWord)) {
             return new LinkedList<>();
@@ -4134,29 +4117,664 @@ e   o   ne  no
 
 //            backtrack(target, list, cur, nq, vis);
 
-            cur.remove(cur.size()-1);
+            cur.remove(cur.size() - 1);
         }
+    }
+
+    public String addStrings(String num1, String num2) {
+        int p1 = num1.length() - 1;
+        int p2 = num2.length() - 1;
+        StringBuilder res = new StringBuilder();
+        int carry = 0;
+
+        while (p1 >= 0 || p2 >= 0) {
+            int n1 = p1 >= 0 ? num1.charAt(p1--) - '0' : 0;
+            int n2 = p2 >= 0 ? num2.charAt(p2--) - '0' : 0;
+            int sum = n1 + n2 + carry;
+            carry = sum / 10;
+            res.insert(0, sum % 10);
+        }
+
+        if (carry != 0) {
+            res.insert(0, carry);
+        }
+
+        return res.toString();
+    }
+
+    int abs = Integer.MAX_VALUE;
+
+    public int minimizeTheDifference(int[][] mat, int target) {
+        int m = mat.length;
+        int n = m == 0 ? 0 : mat[0].length;
+        for (int[] arr : mat) {
+            Arrays.sort(arr);
+        }
+        int cur = 0;
+        for (int i = 0; i < m; i++) {
+            cur += mat[i][0];
+        }
+        if (cur == target) return 0;
+        int res = Math.abs(target - cur);
+
+
+        return abs;
+    }
+
+    public List<List<Integer>> subsets(int[] nums) {
+        List<List<Integer>> res = new LinkedList<>();
+        Arrays.sort(nums);
+        helper(nums, res, new ArrayList<>(), 0);
+        return res;
+    }
+
+    private void helper(int[] nums, List<List<Integer>> res, List<Integer> cur, int idx) {
+        res.add(new ArrayList<>(cur));
+
+        for (int i = idx; i < nums.length; i++) {
+            if (i > idx && nums[i] == nums[i - 1]) continue;
+            cur.add(nums[i]);
+            helper(nums, res, cur, i + 1);
+            cur.remove(cur.size() - 1);
+        }
+    }
+
+    public int numEnclaves(int[][] grid) {
+        int count = 0;
+        int m = grid.length;
+        int n = m == 0 ? 0 : grid[0].length;
+        for (int i = 0; i < m; i++) {
+            dfs(grid, i, 0, m, n);
+            dfs(grid, i, n - 1, m, n);
+        }
+
+        for (int i = 0; i < n; i++) {
+            dfs(grid, 0, i, m, n);
+            dfs(grid, m - 1, i, m, n);
+        }
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 1) {
+                    count += dfs(grid, i, j, m, n);
+                }
+            }
+        }
+
+        return count;
+    }
+
+    private int dfs(int[][] grid, int r, int c, int m, int n) {
+        if (r < 0 || c < 0 || r >= m || c >= n) return 0;
+        if (grid[r][c] == 0) return 0;
+
+        grid[r][c] = 0;
+        return dfs(grid, r + 1, c, m, n) +
+                dfs(grid, r, c + 1, m, n) +
+                dfs(grid, r, c - 1, m, n) +
+                dfs(grid, r - 1, c, m, n) + 1;
+    }
+
+    public List<List<String>> findLadders(String start, String end, Set<String> dict) {
+        List<String> target = getAdj(dict, end);
+        if (target == null || target.size() == 0) return new ArrayList<>();
+        Map<String, List<String>> map = new HashMap<>();
+        for (String d : dict) {
+            map.computeIfAbsent(d, v -> getAdj(dict, d));
+        }
+        List<String> init = getAdj(dict, start);
+        if (init == null || init.size() == 0) return new ArrayList<>();
+        map.put(start, init);
+
+        List<List<String>> res = new ArrayList<>();
+        Queue<List<String>> q = new LinkedList<>();
+        List<String> first = new ArrayList<>();
+        first.add(start);
+        q.add(first);
+        boolean isFound = false;
+        Set<String> vis = new HashSet<>();
+
+        System.out.println(map);
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+                List<String> cur = q.poll();
+                String last = cur.get(cur.size() - 1);
+                vis.add(last);
+//                if (last.equals(end)) {
+//                    isFound = true;
+//                    res.add(cur);
+//                }
+                if (target.contains(last)) {
+                    isFound = true;
+                    List<String> ans = new ArrayList<>(cur);
+                    ans.add(end);
+                    res.add(ans);
+                }
+                for (String next : map.getOrDefault(last, new ArrayList<>())) {
+                    if (vis.contains(next)) continue;
+                    List<String> path = new ArrayList<>(cur);
+                    path.add(next);
+                    q.add(path);
+                }
+            }
+
+            if (isFound) break;
+        }
+
+        return res;
+    }
+
+    private List<String> getAdj(Set<String> dict, String d) {
+        List<String> res = new ArrayList<>();
+
+        char[] chars = d.toCharArray();
+
+        for (int i = 0; i < chars.length; i++) {
+            for (char j = 'a'; j <= 'z'; j++) {
+                if (chars[i] == j) continue;
+                char temp = chars[i];
+                chars[i] = j;
+                if (dict.contains(String.valueOf(chars))) res.add(String.valueOf(chars));
+                chars[i] = temp;
+            }
+        }
+
+        return res;
+    }
+
+    public List<List<Integer>> verticalTraversal(TreeNode root) {
+        if (root == null) return new ArrayList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        Map<Integer, List<Pair<Integer, Integer>>> map = new TreeMap<>();
+        Queue<Node> q = new LinkedList<>();
+        q.offer(new Node(0, root)); // col, node
+        int level = 0;
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+
+                Node temp = q.poll();
+                int col = temp.id;
+                TreeNode cur = temp.node;
+                map.putIfAbsent(col, new ArrayList<>());
+                map.get(col).add(new Pair<>(cur.val, level));
+
+                if (cur.left != null) {
+                    q.offer(new Node(col - 1, cur.left));
+                }
+                if (cur.right != null) {
+                    q.offer(new Node(col + 1, cur.right));
+                }
+            }
+            level++;
+        }
+
+        for (List<Pair<Integer, Integer>> list : map.values()) {
+            Collections.sort(list, (a, b)
+                    -> a.getValue() == b.getValue() ? a.getKey() - b.getKey() : a.getValue() - b.getValue());
+            List<Integer> cur = new ArrayList<>();
+            for (Pair<Integer, Integer> p : list) {
+                cur.add(p.getKey());
+            }
+            res.add(cur);
+        }
+
+        return res;
+    }
+
+    class Node {
+        int id;
+        TreeNode node;
+
+        public Node(int id, TreeNode node) {
+            this.id = id;
+            this.node = node;
+        }
+    }
+    public int jump(int[] nums) {
+        int n = nums.length;
+        int curMax = 0;
+        int canReach = 0;
+        int steps = 0;
+
+        for (int i = 0; i < n-1; i++) {
+            canReach = Math.max(canReach, i+nums[i]);
+            if (i == curMax) {
+                steps++;
+                curMax = canReach;
+            }
+        }
+        return curMax >= n - 1 ? steps : -1;
+    }
+
+    //863
+    public List<Integer> distanceK(TreeNode root, TreeNode target, int k) {
+        Map<Integer, TreeNode> map = new HashMap<>();
+        parentMap(root, map);
+        List<Integer> res = new LinkedList<>();
+        dfs(target, null, k, 0, res, map);
+        return res;
+    }
+    private void dfs(TreeNode root, TreeNode from, int k, int depth, List<Integer> res, Map<Integer, TreeNode> map) {
+        if (root == null) return;
+        if (depth == k) {
+            res.add(root.val);
+            return;
+        }
+
+        if (root.left != from) {
+            dfs(root.left, root, k, depth+1, res, map);
+        }
+        if (root.right != from) {
+            dfs(root.right, root, k, depth+1, res, map);
+        }
+        if (map.get(root.val) != from) {
+            dfs(map.get(root.val), root, k, depth+1, res, map);
+        }
+    }
+    private void parentMap(TreeNode root, Map<Integer, TreeNode> map) {
+        if (root.left != null) {
+            map.put(root.left.val, root);
+            parentMap(root.left, map);
+        }
+        if (root.right != null) {
+            map.put(root.right.val, root);
+            parentMap(root.right, map);
+        }
+    }
+    public int orangesRotting(int[][] grid) {
+        int m = grid.length;
+        int n = m == 0 ? 0 : grid[0].length;
+        Queue<Integer> q = new LinkedList<>();
+        int count = 0;
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (grid[i][j] == 2) {
+                    q.add(i*n+j);
+                } else if (grid[i][j] == 1) {
+                    count++;
+                }
+            }
+        }
+
+        if (count == 0) return 0;
+        int min = -1;
+        int[] dir = {0,1,0,-1,0};
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+                int idx = q.poll();
+                int x = idx/n;
+                int y = idx%n;
+                for (int i = 0; i < 4; i++) {
+                    int r = x + dir[i];
+                    int c = y + dir[i+1];
+                    if (r < 0 || c < 0 || r >= m || c >= n) continue;
+                    if (grid[r][c] != 1) continue;
+                    grid[r][c] = 2;
+                    count--;
+                    q.add(r*n+c);
+                }
+            }
+            min++;
+        }
+        for (int[] na : grid) System.out.println(Arrays.toString(na));
+
+        return count == 0 ? min : -1;
+    }
+
+    public boolean possibleBipartition(int n, int[][] dislikes) {
+        List<Integer>[] adj = new List[n+1];
+        for (int i = 1; i <= n; i++) {
+            adj[i] = new LinkedList<>();
+        }
+        for (int[] d : dislikes) {
+            adj[d[0]].add(d[1]);
+            adj[d[1]].add(d[0]);
+        }
+        int[] color = new int[n+1];
+        for (int i = 1; i <= n; i++) {
+            if (color[i] != 0) continue;
+            color[i] = 1;
+            if (!dfs(adj, i, color)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private boolean dfs(List<Integer>[] adj , int cur, int[] color) {
+        for (int d : adj[cur]) {
+            if (color[d] == 0) {
+                color[d] = - color[cur];
+                if (!dfs(adj, d, color)) return false;
+            } else if (color[d] == color[cur]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public int minimumOperations(int[] nums, int start, int goal) {
+        Set<Integer> set = new HashSet<>();
+        for (int n : nums) set.add(n);
+        Set<Integer> vis = new HashSet<>();
+        Queue<Integer> q = new LinkedList<>();
+
+        for (int n : set) {
+            int a = start + n;
+            int b = start - n;
+            int c = start ^ n;
+            if (!vis.contains(a)) {
+                vis.add(a);
+                q.add(a);
+            }
+            if (!vis.contains(b)) {
+                vis.add(b);
+                q.add(b);
+            }
+            if (!vis.contains(c)) {
+                vis.add(c);
+                q.add(c);
+            }
+        }
+
+        int steps = 0;
+
+        while (!q.isEmpty()) {
+            steps++;
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+                int cur = q.poll();
+                if (cur == goal) return steps;
+                if (cur < 0 || cur > 1000) continue;
+                for (int n : set) {
+                    int a = cur + n;
+                    int b = cur - n;
+                    int c = cur ^ n;
+                    if (!vis.contains(a)) {
+                        vis.add(a);
+                        q.add(a);
+                    }
+                    if (!vis.contains(b)) {
+                        vis.add(b);
+                        q.add(b);
+                    }
+                    if (!vis.contains(c)) {
+                        vis.add(c);
+                        q.add(c);
+                    }
+                }
+            }
+        }
+
+        return -1;
+    }
+
+
+    public int woodCut(int[] L, int k) {
+        if (L == null || L.length == 0) return 0;
+        int hi = 0;
+        for (int n : L) hi = Math.max(hi, n);
+        int lo  = 0;
+
+        int res = 0;
+        while (lo <= hi) {
+            int mid = lo + (hi - lo) / 2;
+            if (canCut(L, k, mid)) {
+                res = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        return res;
+    }
+
+    private boolean canCut(int[] l, int k, int mid) {
+        int count = 0;
+        for (int n : l) {
+            count += n/mid;
+            if (count >= k) return true;
+        }
+        return false;
+    }
+    public String getDirections(TreeNode root, int startValue, int destValue) {
+        Map<Integer, Nodes> map = new HashMap<>();
+        helper(root, map);
+        Queue<TreeNode> q = new LinkedList();
+        q.offer(root);
+//        System.out.println(map);
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+            for (int k = 0; k < size; k++) {
+                TreeNode cur = q.poll();
+                Nodes node = map.get(cur.val);
+                if (cur.left != null) {
+                    q.offer(cur.left);
+                    node.l.add(cur.left.val);
+                    Nodes p = map.get(cur.left.val);
+                    p.u.add(cur.val);
+                }
+                if (cur.right != null) {
+                    q.offer(cur.right);
+                    node.r.add(cur.right.val);
+                    Nodes p = map.get(cur.right.val);
+                    p.u.add(cur.val);
+                }
+            }
+        }
+        int[] vis = new int[map.size()+1];
+//        vis[startValue] = -1;
+        Ans cur = new Ans(startValue, "");
+        Queue<Ans> queue = new LinkedList<>();
+        queue.offer(cur);
+        while (!queue.isEmpty()) {
+            int sz = queue.size();
+            for (int k = 0; k < sz; k++) {
+                Ans ans = queue.poll();
+                vis[ans.val] = -1;
+                if (ans.val == destValue) {
+                    String s = ans.str;
+                    return s;
+                }
+                Nodes node = map.get(ans.val);
+                List<Integer> u = node.u;
+                List<Integer> l = node.l;
+                List<Integer> r = node.r;
+                for (int n : u) {
+                    if (vis[n] != -1) {
+                        queue.offer(new Ans(n, ans.str + "U"));
+                    }
+                }
+                for (int n : l) {
+                    if (vis[n] != -1) {
+                        queue.offer(new Ans(n, ans.str + "L"));
+                    }
+                }
+                for (int n : r) {
+                    if (vis[n] != -1) {
+                        queue.offer(new Ans(n, ans.str + "R"));
+                    }
+                }
+            }
+        }
+
+        return "";
+    }
+    public void helper(TreeNode root, Map<Integer, Nodes> map) {
+        Queue<TreeNode> q = new LinkedList();
+        q.offer(root);
+        while (!q.isEmpty()) {
+            TreeNode cur = q.poll();
+            map.put(cur.val, new Nodes(cur.val));
+            if (cur.left != null) q.offer(cur.left);
+            if (cur.right != null) q.offer(cur.right);
+        }
+    }
+    class Ans {
+        int val;
+        String str;
+
+        public Ans(int val, String str) {
+            this.val = val;
+            this.str = str;
+        }
+    }
+
+    class Nodes {
+        List<Integer> u;
+        List<Integer> l;
+        List<Integer> r;
+        int val;
+        public Nodes(int n){
+            this.val = n;
+            this.u = new ArrayList<>();
+            this.l = new ArrayList<>();
+            this.r = new ArrayList<>();
+        }
+        @Override
+        public String toString() {
+            return "Nodes{" +
+                    "u=" + u +
+                    ", l=" + l +
+                    ", r=" + r +
+                    '}';
+        }
+    }
+    public static void main(String[] args) {
+
+        Solution s = new Solution();
+        TreeNode one = new TreeNode(1);
+        TreeNode two = new TreeNode(2);
+        TreeNode four = new TreeNode(4);
+        TreeNode three = new TreeNode(3);
+        TreeNode six = new TreeNode(6);
+        TreeNode five = new TreeNode(5);
+
+        one.left = three;
+        two.right = four;
+        two.left = six;
+        five.left = one;
+        five.right = two;
+        s.getDirections(five, 4, 3);
+
     }
 }
 
-class LRUCache extends LinkedHashMap<Integer, Integer> {
-    private int capacity;
+class LRUCache {
+    class Node {
+        Node pre;
+        Node next;
+        int key;
+        int val;
+
+        public Node(int key, int val) {
+            this.val = key;
+            this.val = val;
+        }
+    }
+
+    int cap;
+    Node head;
+    Node tail;
+    Map<Integer, Node> map;
 
     public LRUCache(int capacity) {
-        super(capacity, 0.75F, true);
-        this.capacity = capacity;
+        this.cap = capacity;
+        this.head = new Node(-1, -1);
+        this.tail = new Node(-1, -1);
+        head.next = tail;
+        tail.pre = head;
+        this.map = new HashMap<>();
     }
 
     public int get(int key) {
-        return super.getOrDefault(key, -1);
+        if (!map.containsKey(key)) return -1;
+        Node res = map.get(key);
+        delete(res);
+        add(res);
+        return res.val;
     }
 
     public void put(int key, int value) {
-        super.put(key, value);
+        Node cur = map.get(key);
+        if (cur != null) {
+            delete(cur);
+            cur.val = value;
+            add(cur);
+            return;
+        }
+        cur = new Node(key, value);
+        if (map.size() >= cap) {
+            map.remove(tail.pre.key);
+            delete(tail.pre);
+        }
+        map.put(key, cur);
+        add(cur);
     }
 
-    @Override
-    protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
-        return size() > capacity;
+    public void delete(Node node) {
+        node.pre.next = node.next;
+        node.next.pre = node.pre;
+        node = null;
+    }
+
+    public void add(Node node) {
+        node.next = head.next;
+        node.pre = head;
+        head.next.pre = node;
+        head.next = node;
+    }
+
+    public static void main(String[] args) {
+        LRUCache lruCache = new LRUCache(2);
+        lruCache.put(1, 1);
+        lruCache.put(2, 2);
+        System.out.println(lruCache.get(1));
+        lruCache.put(3, 3);
+        System.out.println(lruCache.get(2));
+        System.out.println(lruCache.get(3));
+        System.out.println(lruCache.get(1));
+
     }
 }
+
+class RangeFreqQuery {
+    Map<Integer, Map<Integer, Integer>> map;
+    List<Map<Integer, Integer>>[] list;
+    // int[] nums;
+    public RangeFreqQuery(int[] arr) {
+        // this.nums = arr;
+        int n = arr.length;
+        this.map = new HashMap<>();
+        Map<Integer, Integer> freq = new HashMap<>();
+        for (int i = 0; i < n; i++) {
+            freq = map.getOrDefault(i-1, new HashMap<>());
+            int count = freq.getOrDefault(arr[i], 0) + 1;
+            Map<Integer, Integer> next = new HashMap<>(freq);
+            next.put(arr[i], count);
+            map.put(i, next);
+            freq = null;
+
+        }
+
+    }
+
+    public int query(int left, int right, int value) {
+
+        int lo = map.getOrDefault(left-1, new HashMap<>()).getOrDefault(value, 0);
+        int hi = map.getOrDefault(right, new HashMap<>()).getOrDefault(value, 0);
+        return hi - lo;
+    }
+
+    public static void main(String[] args) {
+        RangeFreqQuery r = new RangeFreqQuery(new int[] {12,33,4,56,22,2,34,33,22,12,34,56});
+        System.out.println(r.query(0,11,33));
+    }
+}
+
+

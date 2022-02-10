@@ -1,24 +1,21 @@
 package com.company;
 
 
-  public class TreeNode {
-      int val;
-      TreeNode left;
-      TreeNode right;
-      TreeNode() {}
-      TreeNode(int val) { this.val = val; }
-      TreeNode(int val, TreeNode left, TreeNode right) {
-          this.val = val;
-          this.left = left;
-          this.right = right;
-      }
+public class TreeNode {
+    public int val;
+    public TreeNode left, right;
 
-      @Override
-      public String toString() {
-          return "TreeNode{" +
-                  "val=" + val +
-                  ", left=" + left+
-                  ", right=" + right +
-                  '}';
-      }
-  }
+    public TreeNode(int val) {
+        this.val = val;
+        this.left = this.right = null;
+    }
+
+    @Override
+    public String toString() {
+        return "TreeNode{" +
+                "val=" + val +
+                ", left=" + left +
+                ", right=" + right +
+                '}';
+    }
+}

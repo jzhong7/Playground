@@ -1,7 +1,9 @@
 package com.company.linkedin;
 
 import com.company.TreeNode;
+import com.sun.org.apache.bcel.internal.generic.INEG;
 
+import javax.smartcardio.ATR;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -744,4 +746,39 @@ class AutocompleteSystem {
         return res;
     }
 
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        int[][] cost = new int[n][n];
+        for (int[] c : cost) Arrays.fill(c, -1);
+        Map<Integer, List<Integer>> map = new HashMap<>();
+        for (int[] f : flights) {
+            cost[f[0]][f[1]] = f[2];
+            List<Integer> list = map.getOrDefault(f[0], new ArrayList<>());
+            list.add(f[1]);
+            map.put(f[0], list);
+        }
+
+        // Queue<int[]> pq = new LinkedList<>();
+        Queue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
+        pq.add(new int[] {src, 0, 0});
+        while (!pq.isEmpty()) {
+            int[] cur = pq.poll();
+            int x = cur[0];
+            int c = cur[1];
+            int stops = cur[2];
+            if (x == dst) {
+                return c;
+            }
+            if (stops > k) continue;
+            for (Integer y : map.getOrDefault(x, new ArrayList<>())) {
+                pq.add(new int[] {y, c+cost[x][y], stops+1});
+            }
+        }
+        return -1;
+    }
+
+
+    public static void main(String[] args) {
+        int[][] mat = {{0,1,100}, {1,2,100},{0,2,500}};
+//        System.out.println(findCheapestPrice(3,mat,0,2,1));
+    }
 }

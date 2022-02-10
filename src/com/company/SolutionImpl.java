@@ -92,7 +92,8 @@ public class SolutionImpl {
         n[2]= n3;
         n[3] = n4;
         List<String> list = Arrays.asList("hot","dot","dog","lot","log","cog");
-        System.out.println(solution.findLadders("hit", "cog", list));
+
+//        System.out.println(solution.findLadders("hit", "cog", list));
 //        int[][] a = {{1,2},{4,5}, {8,10}};
         int[][] ask = {{4,5}, {5,6}};
         List<int[]> a = Arrays.asList(new int[] {1,3}, new int[] {2,5}, new int[] {3,7}, new int[] {4,10});
