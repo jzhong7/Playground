@@ -655,3 +655,806 @@ class RandomizedSet {
         }
     }
 }
+class Main {
+    static long triplets(long t, List<Integer> d) {
+        Collections.sort(d);
+        long count = 0;
+
+        for (int i = 0; i < d.size() - 2; i++) {
+            int lo = i + 1;
+            int hi = d.size() - 1;
+            while (lo < hi) {
+                if (d.get(lo) + d.get(hi) + d.get(i) > t) {
+                    hi--;
+                } else {
+                    count += (hi - lo);
+                    lo++;
+                }
+            }
+        }
+
+        return count;
+    }
+
+    public static String compressString(String s) {
+        if (s == null || s.length() <= 1) return s;
+        int count = 1;
+        StringBuilder sb = new StringBuilder();
+        char pre = ' ';
+        for (int i = 0; i < s.length(); i++) {
+            char c = s.charAt(i);
+            if (i == 0) {
+                pre = c;
+            } else  {
+                if (c == pre) {
+                    count++;
+                } else {
+                    sb.append(pre);
+                    if (count != 1) sb.append(count);
+                    pre = c;
+                    count = 1;
+                }
+            }
+        }
+
+        sb.append(pre);
+        if (count != 1) sb.append(count);
+
+        return sb.toString();
+    }
+
+    public static int circularArray(int n, List<Integer> endNode) {
+        int size = endNode.size();
+        Map<Integer, Integer> map = new HashMap<>();
+        int start = endNode.get(0);
+        int end = endNode.get(size-1);
+
+        for (int i = 0; i < size; i++) {
+            map.put(endNode.get(i), map.getOrDefault(endNode.get(i), 0) + 1);
+        }
+        System.out.println(map);
+        for (Map.Entry e : map.entrySet()) {
+            if ((int) e.getKey() >= end) {
+                map.put((int) (e.getKey()), map.get((int) (e.getKey())) - 1);
+            }
+            if ((int) e.getKey() > start) {
+                map.put((int) (e.getKey()), map.get((int) (e.getKey())) + 1);
+            }
+        }
+
+        int max = 0;
+        int res = 0;
+
+        for (Map.Entry e : map.entrySet()) {
+            if (max < (int) (e.getValue())
+                    || (max == (int) (e.getValue()) && res > (int) (e.getKey()))) {
+                max = (int) e.getValue();
+                res = (int) e.getKey();
+            }
+        }
+        System.out.println(map);
+        return res;
+    }
+
+    //skyline - sweep line
+    public List<List<Integer>> getSkyline(int[][] buildings) {
+        List<int[]> list = new ArrayList<>();
+        for (int[] b : buildings) {
+            list.add(new int[] {b[0], b[2]});
+            list.add(new int[] {b[1], -b[2]});
+        }
+
+        Collections.sort(list, (a, b) -> a[0] == b[0] ? b[1] - a[1] : a[0] - b[0]);
+
+        Queue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+        pq.add(0);
+        List<List<Integer>> res = new ArrayList<>();
+        for (int[] l : list) {
+            int x = l[0];
+            int h = l[1];
+
+            if (h > 0) {
+                if (h > pq.peek()) {
+                    res.add(Arrays.asList(x, h));
+                }
+                pq.add(h);
+            } else {
+                pq.remove(-h);
+                if (-h > pq.peek()) {
+                    res.add(Arrays.asList(x, pq.peek()));
+                }
+            }
+        }
+
+        return res;
+    }
+
+    public static void main(String[] args) {
+        List<List<Integer>> edges = List.of(List.of(0, 1), List.of(1,2), List.of(2,3));
+//        System.out.println(solve(new int[] {1,2,3,4}, edges));
+        System.out.println(new Main().calculate("(2+6*3+5-(3*14/7 + 2)*5)+3"));
+//        System.out.println(new Main().maxExcitements(new int[] {1,2,3,4}, edges));
+
+        String[] d = {"0201","0101","0102","1212","2002"};
+//        System.out.println(new Main().openLock(d, "0202"));
+    }
+
+    //given list of cities with excitements, return max excitements of 4 cities
+    public int maxExcitements(int[] excitements, List<List<Integer>> edges) {
+        if (excitements == null || edges == null) return 0;
+
+        Map<Integer, List<int[]>> graph = new HashMap<>(); // <city, <city, excitement>>
+        for (List<Integer> e : edges) {
+            List<int[]> l1 = graph.getOrDefault(e.get(0), new ArrayList<>());
+            l1.add(new int[] {e.get(1), excitements[e.get(1)]});
+            graph.put(e.get(0), l1);
+
+            List<int[]> l2 = graph.getOrDefault(e.get(1), new ArrayList<>());
+            l2.add(new int[] {e.get(0), excitements[e.get(0)]});
+            graph.put(e.get(1), l2);
+        }
+
+        for (Integer key : graph.keySet()) {
+            graph.put(key, topK(graph.get(key), 3));
+        }
+        int res = 0;
+        for (List<Integer> e : edges) {
+            Set<Integer> set = new HashSet<>();
+            set.add(e.get(0));
+            set.add(e.get(1));
+            for (int[] u : graph.get(e.get(0))) {
+                if (set.contains(u[0])) continue;
+                for (int[] v : graph.get(e.get(1))) {
+                    if (set.contains(v[0])) continue;
+                    if (u[0] != v[0]) {
+                        int cur = excitements[e.get(0)] + excitements[e.get(1)] +  v[1] + u[1];
+                        res = Math.max(res, cur);
+                    }
+                }
+            }
+        }
+
+        return res;
+    }
+
+    private List<int[]> topK(List<int[]> list, int k) {
+        if (list == null || list.size() <= k) return list;
+        Queue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
+        for (int[] l : list) {
+            if (!pq.isEmpty() && pq.peek()[1] < l[1]) {
+                pq.poll();
+            }
+            pq.add(l);
+        }
+        return list;
+    }
+
+    //ring lock
+    public int openLock(String[] deadends, String target) {
+        if (target == "0000") return 0;
+
+        Map<String, Integer>  map = new HashMap<>();// 0 -> un-visited, 1 -> up, -1 -> down, 2 -> dead end
+        for (String d : deadends) {
+            map.put(d, 2);
+        }
+
+        if (map.containsKey(target) || map.containsKey("0000")) return -1;
+
+        int dir = 1;
+        Queue<String> forward = new LinkedList<>();
+        Queue<String> backward = new LinkedList<>();
+        forward.add("0000");
+        backward.add(target);
+        map.put("0000", 1);
+        map.put(target, -1);
+        int count = 1;
+
+        while (!forward.isEmpty() && !backward.isEmpty()) {
+            if (forward.size() > backward.size()) {
+                dir = -dir;
+                Queue<String> temp = backward;
+                backward = forward;
+                forward = temp;
+            }
+
+            int size = forward.size();
+            for (int i = 0; i < size; i++) {
+                String cur = forward.poll();
+                for (int k = 0; k < 4; k++) {
+                    char c = cur.charAt(k);
+                    String up = cur.substring(0, k) + (c == '9' ? 0 : c - '0' + 1) + cur.substring(k + 1);
+                    String down = cur.substring(0, k) + (c == '0' ? 9 : c - '0' - 1) + cur.substring(k + 1);
+
+                    if (map.getOrDefault(up, 0) == -dir || map.getOrDefault(down, 0) == -dir) {
+                        return count;
+                    }
+
+                    if (!map.containsKey(up)) {
+                        map.put(up, dir);
+                        forward.add(up);
+                    }
+                    if (!map.containsKey(down)) {
+                        map.put(down, dir);
+                        forward.add(down);
+                    }
+
+                }
+
+            }
+            count++;
+        }
+        return -1;
+    }
+
+    private int index = 0;
+    public int calculate(String s) {
+        char[] ch = s.toCharArray();
+        return cal(ch);
+    }
+
+    private int cal(char[] ch) {
+        Stack<Integer> st = new Stack<>();
+        int num = 0;
+        char sign = '+';
+        for (; index < ch.length; index++) {
+            char c = ch[index];
+            if (Character.isDigit(c)) {
+                num = num * 10 + (c - '0');
+            }
+
+            if (c == '(') {
+                index++;
+                num = cal(ch);
+                System.out.println(num);
+            }
+
+            if ((!Character.isDigit(c) && c != ' ') || index == ch.length - 1) { // sign
+                if (sign == '+') {
+                    st.push(num);
+                } else if (sign == '-') {
+                    st.push(-num);
+                } else if (sign == '*') {
+                    int pre = st.pop();
+                    st.push(pre * num);
+                } else if (sign == '/') {
+                    int pre = st.pop();
+                    st.push(pre / num);
+                }
+
+                sign  = c;
+                num = 0;
+            }
+
+            if (c == ')') {
+                break;
+            }
+        }
+
+        int res = 0;
+        while (!st.isEmpty()) {
+            res += st.pop();
+        }
+        return res;
+    }
+}
+
+//basic cal
+class Solutiona {
+    private int index = 0;
+    public int calculate(String s) {
+        char[] ch = s.toCharArray();
+        return cal(ch);
+    }
+    private int cal(char[] ch){
+        Deque<Integer> stack = new ArrayDeque<>();
+        int num = 0;
+        char sign = '+';
+        for(; index < ch.length; index++){
+            char c = ch[index];
+            if(Character.isDigit(c)){
+                num = num*10 + (c-'0');
+            }
+            if(c == '('){
+                index++;//index指针指到下一个字符
+                num = cal(ch);
+            }
+            //当遇到了新的运算符，就要对上一个运算符sign和累计的数字num作运算
+            //空格直接无视，i继续前进
+            //遇到字符串末尾，肯定是要结算的
+            if(!Character.isDigit(c)&& c != ' ' || index == ch.length-1){
+                int pre = 0;
+                switch(sign){
+
+                    case '+':
+                        stack.push(num);
+                        break;
+                    case '-':
+                        stack.push(-num);
+                        break;
+                    case '*':
+                        pre = stack.pop();
+                        stack.push(pre * num);
+                        break;
+                    case '/':
+                        pre = stack.pop();
+                        stack.push(pre / num);
+                        break;
+                }
+                sign = c;
+                num = 0;//计数归位
+            }
+            if(c == ')') break;//阶段，后面开始计算局部结果，返回
+        }
+
+        int res = 0;
+        while(!stack.isEmpty()){
+            res += stack.pop();
+        }
+        return res;
+    }
+}
+
+class Event {
+    int x;
+    String s;
+    int start;
+
+    public Event(int x, String s, int start) {
+        this.x = x;
+        this.s = s;
+        this.start = start;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + x + ", " + s + ", " + start + "]";
+    }
+}
+class Annotation {
+    int x;
+    int y;
+    String annotation;
+
+    public Annotation(int x, int y, String annotation) {
+        this.x = x;
+        this.y = y;
+        this.annotation = annotation;
+    }
+
+    @Override
+    public String toString() {
+        return "[" + x + ", " + y + ", " + annotation + "]";
+    }
+
+    //intervals
+    public static List<Annotation> getIntervals(List<Annotation> list) {
+        if (list == null || list.size() <= 1) return list;
+        List<Annotation> res = new ArrayList<>();
+
+        List<Event> events = new ArrayList<>();
+        for (Annotation a : list) {
+            events.add(new Event(a.x, a.annotation, 1));
+            events.add((new Event(a.y, a.annotation, -1)));
+        }
+
+        Collections.sort(events, (a, b) -> a.x == b.x ? b.start - a.start : a.x - b.x);
+        System.out.println(events);
+
+        int pre = -1;
+        List<String> ans = new ArrayList<>();
+        for (int i = 0; i < events.size(); i++) {
+            Event e = events.get(i);
+            int lo = e.x;
+            String s = e.s;
+            int start = e.start;
+
+            if (i == 0) {
+                pre = lo;
+                ans.add(s);
+            } else {
+                res.add(new Annotation(pre, lo, String.join("", ans)));
+                if (start == 1) {
+                    ans.add(s);
+                } else {
+                    ans.remove(s);
+                }
+                pre = lo;
+            }
+        }
+
+        return res;
+    }
+
+    public static void main(String[] args) {
+        List<Annotation> list = Arrays.asList(new Annotation(0, 30, "A"),
+                new Annotation(5, 10, "B"),
+                new Annotation(15, 20, "C"),
+                new Annotation(12, 28, "D"));
+
+        System.out.println(getIntervals(list));
+
+
+    }
+
+}
+
+class ArrayTree {
+    public static void remove(List<Node> nodes, int idx) {
+        List<Integer>[] list = new List[nodes.size()];
+        for (int i = 0; i < nodes.size(); i++) {
+            list[i] = new ArrayList<>();
+        }
+
+        for (int i = 0; i < nodes.size(); i++) {
+            if (nodes.get(i).parent == -1) continue;
+            list[nodes.get(i).parent].add(i);
+        }
+
+        if (idx < 0 || idx >= nodes.size()) return;
+
+        if (list[idx] != null && list[idx].size() != 0) {
+            int p = nodes.get(idx).parent;
+            for (int next : list[idx]) {
+//                nodes.get(next).parent = p;
+                remove(nodes, next);
+            }
+        }
+
+        nodes.get(idx).val = -1;
+        nodes.get(idx).parent = -1;
+
+
+    }
+
+
+    public static void main(String[] args) {
+        List<Node> arr = Arrays.asList(new Node(1, -1),
+                new Node(2, 0),
+                new Node(3, 0),
+                new Node(4, 1),
+                new Node(5, 1));
+        remove(arr, 0);
+        System.out.println(arr);
+    }
+
+    static class Node {
+        int val;
+        int parent;
+
+        public Node(int val, int parent) {
+            this.val = val;
+            this.parent = parent;
+        }
+
+        @Override
+        public String toString() {
+            return "[" + val +
+                    " " + parent +
+                    ']';
+        }
+    }
+}
+
+//waitlist - LRU implement
+class WaitList {
+    int largeCap;
+    int smallCap;
+    Map<Integer, Party> map; // <partyId, party>
+    int largeTaken;
+    int smallTaken;
+    Party largeHead;
+    Party smallHead;
+    Party largeTail;
+    Party smallTail;
+
+    public WaitList(int largeCap, int smallCap) {
+        this.largeCap = largeCap;
+        this.smallCap = smallCap;
+        this.largeTaken = 0;
+        this.smallTaken = 0;
+        this.largeHead = new Party(-1, -1);
+        this.largeTail = new Party(-1, -1);
+        largeHead.next = largeTail;
+        largeTail.pre = largeHead;
+
+        this.smallHead = new Party(-1, -1);
+        this.smallTail = new Party(-1, -1);
+        smallHead.next = smallTail;
+        smallTail.pre = smallHead;
+
+        this.map = new HashMap<>();
+
+    }
+
+    public boolean join(Party p) {
+        if (largeTaken + smallTaken >= largeCap + smallCap) return false;
+        int size = p.size;
+        if (size == 2) {
+            if (largeTaken >= largeCap) return false;
+            takeLarge(p);
+            map.put(p.id, p);
+        } else {
+            if (smallTaken >= smallCap) {
+                takeLarge(p);
+                map.put(p.id, p);
+            } else {
+                takeSmall(p);
+                map.put(p.id, p);
+            }
+        }
+        return true;
+    }
+
+    private void takeSmall(Party p) {
+        p.taken = 1;
+        smallHead.next.pre = p;
+        p.next = smallHead.next;
+        p.pre = smallHead;
+        smallHead.next = p;
+        smallTaken++;
+    }
+
+    private void takeLarge(Party p) {
+        p.taken = 2;
+        largeHead.next.pre = p;
+        p.next = largeHead.next;
+        p.pre = largeHead;
+        largeHead.next = p;
+        largeTaken++;
+    }
+
+    public boolean remove(int id) {
+        if (!map.containsKey(id)) return false;
+        Party p = map.get(id);
+        int size = p.taken;
+        map.remove(id);
+        if (size == 2) {
+//            removeLarge(p);
+            remove(p, true);
+        } else {
+//            removeSmall(p);
+            remove(p, false);
+        }
+        return true;
+    }
+
+//    private void removeSmall(Party p) {
+//        p.next.pre = p.pre;
+//        p.pre.next = p.next;
+//        p =  null;
+//        smallTaken--;
+//    }
+//
+//    private void removeLarge(Party p) {
+//        p.next.pre = p.pre;
+//        p.pre.next = p.next;
+//        p =  null;
+//        largeTaken--;
+//    }
+
+    private void remove(Party p, boolean isLarge) {
+        p.next.pre = p.pre;
+        p.pre.next = p.next;
+        p =  null;
+        if (isLarge) {
+            largeTaken--;
+        } else {
+            smallTaken--;
+        }
+    }
+
+    public boolean popLast(int size) {
+        if (size == 2) {
+            if (largeTaken == 0) return false;
+            pop(true);
+        } else {
+            if (smallTaken == 0) return false;
+            pop(false);
+        }
+
+        return true;
+    }
+
+    private void pop(boolean isLarge) {
+        Party p;
+        if (isLarge) {
+            p = largeTail.pre;
+        } else {
+            p = smallTail.pre;
+        }
+        map.remove(p.id);
+        remove(p, isLarge);
+    }
+
+    public static void main(String[] args) {
+        Party p1 = new Party(1, 1);
+        Party p2 = new Party(2, 1);
+        Party p3 = new Party(3, 2);
+        Party p4 = new Party(4, 2);
+        Party p5 = new Party(5, 1);
+
+        WaitList w = new WaitList(3, 2);
+
+        w.join(p1);
+        w.join(p2);
+        w.join(p3);
+        w.join(p4);
+        w.join(p5);
+        System.out.println(w.largeHead);
+        System.out.println(w.smallHead);
+//        w.popLast(1);
+//        System.out.println(w.largeHead);
+//        System.out.println(w.smallHead);
+        w.remove(4);
+        System.out.println(w.largeHead);
+        System.out.println(w.smallHead);
+    }
+}
+
+class Party {
+    int id;
+    int size; // small -> 1, larger -> 2
+    int taken; // taken table size
+    Party pre;
+    Party next;
+
+    public Party(int id, int size) {
+        this.id = id;
+        this.size = size;
+    }
+
+    @Override
+    public String toString() {
+        return "[ " + id + ", " + size + ", " + taken + ", " + next + "]";
+    }
+}
+
+//friend or ememy, relation list
+class Relation {
+    static class Node {
+        int id;
+        List<Integer> path;
+        int idx;
+
+        public Node(int id, List<Integer> path, int idx) {
+            this.id = id;
+            this.path = path;
+            this.idx = idx;
+        }
+    }
+    public static List<List<Integer>> bfs(List<int[]> relations, String s, int start, int end) {
+        if (s == null || s.length() == 0) return new ArrayList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        Map<Integer, List<Integer>> friends = new HashMap<>();
+        Map<Integer, List<Integer>> enemies = new HashMap<>();
+        for (int[] r : relations) {
+            int x = r[0];
+            int y = r[1];
+            int z = r[2];
+            if (z == 1) {
+                List<Integer> l1 = friends.getOrDefault(x, new ArrayList<>());
+                l1.add(y);
+                friends.put(x, l1);
+                List<Integer> l2 = friends.getOrDefault(y, new ArrayList<>());
+                l2.add(x);
+                friends.put(y, l2);
+            } else {
+                List<Integer> l1 = enemies.getOrDefault(x, new ArrayList<>());
+                l1.add(y);
+                enemies.put(x, l1);
+                List<Integer> l2 = enemies.getOrDefault(y, new ArrayList<>());
+                l2.add(x);
+                enemies.put(y, l2);
+            }
+        }
+
+        Queue<Node> q = new LinkedList<>();
+        List<Integer> l =new ArrayList<>();
+        l.add(start);
+        q.add(new Node(start, l, 0));
+        Set<Integer> vis = new HashSet<>();
+        vis.add(start);
+
+        while (!q.isEmpty()) {
+            Node cur = q.poll();
+            int id = cur.id;
+            int idx = cur.idx;
+            List<Integer> path = cur.path;
+            if (id == end && idx == s.length()) {
+                res.add(path);
+                continue;
+            }
+            if (idx >= s.length()) continue;
+            List<Integer> nextList;
+            if (s.charAt(idx) == 'F') {
+                nextList = friends.getOrDefault(id, new ArrayList<>());
+            } else {
+                nextList = enemies.getOrDefault(id, new ArrayList<>());
+            }
+            for (int next : nextList) {
+                if (path.contains(next)) continue;
+                List<Integer> newP = new ArrayList<>(path);
+                newP.add(next);
+                vis.add(next);
+                q.add(new Node(next, newP, idx + 1));
+            }
+        }
+
+        return res;
+    }
+
+    public static void main(String[] args) {
+        //1 -> friend, 0 -> enemy
+        List<int[]> list = Arrays.asList(
+                new int[] {0, 1, 1},
+                new int[] {0, 2, 1},
+                new int[] {0, 3, 1},
+                new int[] {1, 2, 0},
+                new int[] {2, 3, 0},
+                new int[] {1, 3, 0},
+                new int[] {3, 4, 0},
+                new int[] {0, 5, 0},
+                new int[] {5, 1, 0},
+                new int[] {5, 2, 0});
+        System.out.println(dfs(list, "FEE", 0, 1));
+
+        List<String> l = Arrays.asList("a","banana","app","appl","ap","apply","apple");
+        Collections.sort(l);
+    }
+
+    private static List<List<Integer>> dfs(List<int[]> relations, String s, int start, int end) {
+        if (s == null || s.length() == 0) return new ArrayList<>();
+        List<List<Integer>> res = new ArrayList<>();
+        Map<Integer, List<Integer>> friends = new HashMap<>();
+        Map<Integer, List<Integer>> enemies = new HashMap<>();
+        for (int[] r : relations) {
+            int x = r[0];
+            int y = r[1];
+            int z = r[2];
+            if (z == 1) {
+                List<Integer> l1 = friends.getOrDefault(x, new ArrayList<>());
+                l1.add(y);
+                friends.put(x, l1);
+                List<Integer> l2 = friends.getOrDefault(y, new ArrayList<>());
+                l2.add(x);
+                friends.put(y, l2);
+            } else {
+                List<Integer> l1 = enemies.getOrDefault(x, new ArrayList<>());
+                l1.add(y);
+                enemies.put(x, l1);
+                List<Integer> l2 = enemies.getOrDefault(y, new ArrayList<>());
+                l2.add(x);
+                enemies.put(y, l2);
+            }
+        }
+        List<Integer> cur = new ArrayList<>();
+        cur.add(start);
+        dfs(friends, enemies, s, 0, start, end, cur, res);
+        return res;
+    }
+
+    private static void dfs(Map<Integer, List<Integer>> friends, Map<Integer, List<Integer>> enemies, String s,
+                            int idx, int start, int end, List<Integer> cur, List<List<Integer>> res) {
+
+        if (start == end && idx == s.length()) {
+            res.add(new ArrayList<>(cur));
+            return;
+        }
+        if (idx >= s.length()) return;
+
+        List<Integer> next;
+        if (s.charAt(idx) == 'F') {
+            next = friends.getOrDefault(start, new ArrayList<>());
+        } else {
+            next = enemies.getOrDefault(start, new ArrayList<>());
+        }
+
+        for (int id : next) {
+            if (cur.contains(id)) continue;
+            cur.add(id);
+            dfs(friends, enemies, s, idx + 1, id, end, cur, res);
+            cur.remove(cur.size() - 1);
+        }
+    }
+
+}
