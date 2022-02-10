@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class VO {
+public class Google {
     /*
         lc 1293 - hard - bfs with 3d vis
         You are given an m x n integer matrix grid where each cell is either 0 (empty) or 1 (obstacle).
@@ -383,11 +383,11 @@ public class VO {
     }
 
     public static void main(String[] args) {
-        VO vo = new VO();
-        int[][] g = {{2, 1, 3}, {6, 5, 4}, {7, 8, 9}};
-        int[] arr = {-5, -2};
-        String[] dict = {"apk", "app", "apple", "arp", "array"};
-        System.out.println(vo.getNumberOfPrefix(dict, "ar"));
+//        VO vo = new VO();
+//        int[][] g = {{2, 1, 3}, {6, 5, 4}, {7, 8, 9}};
+//        int[] arr = {-5, -2};
+//        String[] dict = {"apk", "app", "apple", "arp", "array"};
+//        System.out.println(vo.getNumberOfPrefix(dict, "ar"));
 
     }
 
